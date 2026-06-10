@@ -10,39 +10,45 @@ const socketHandler = (io) => {
     socket.on('user:online', async (userId) => {
       socket.userId = userId;
       socket.join(userId);
-      await User.findOneAndUpdate({ uid: userId }, { isOnline: true });
+      await User.findOneAndUpdate({ uid: userId }, { isOnline :true });
       io.emit('user:online', userId);
     })
 
     // Handling Message Sending
-    socket.on('message.send', async (data) => {
+    socket.on('message:send', async (data) => {
       const { conversationId, senderId, receiverId, content, type } = data;
-      const message = await Message.create({
-        conversationId, senderId, content, type
-      })
 
-      await Conversation.findByIdAndUpdate(conversationId, {
-        lastMessage: content, updatedAt: Date.now()
-      })
-
-      io.to(receiverId).emit('message: receive', message);
+      try {
+        const message = await Message.create({ conversationId, senderId, content, type });
+        await Conversation.findByIdAndUpdate(conversationId, {
+        lastMessage: content, updatedAt: Date.now() 
+      });
+        io.to(receiverId).emit('message:receive', message);
+      } catch (err) {
+        console.log('message:send error:', err);
+      }
     })
 
     // Typing Indicator
-    socket.on('typing: start', data => {
-      socket.to(data.receiverId).emit('typing: start', data.senderId);
+    socket.on('typing:start', data => {
+      socket.to(data.receiverId).emit('typing:start', data.senderId);
     })
 
-    socket.on('typing: stop', data => {
-      socket.to(data.receiverId).emit('typing: stop', data.senderId);
+    socket.on('typing:stop', data => {
+      socket.to(data.receiverId).emit('typing:stop', data.senderId);
     })
 
     // Read Receipts
-    socket.on('message: seen', async (data) => {
+    socket.on('message:seen', async (data) => {
       const { conversationId, userId, senderId } = data;
-      await Message.updateMany({ conversationId, seenBy: { $ne: userId } }, { $push: { seenBy: userId } });
 
-      io.to(senderId).emit('message: seen', { conversationId, userId });
+      try {
+         await Message.updateMany({ conversationId, seenBy: { $ne: userId } }, { $push: { seenBy: userId } });
+
+        io.to(senderId).emit('message:seen', { conversationId, userId });
+      } catch (err) {
+        console.log('message:seen error:', err);
+      }
     })
 
     // User goes Offline
@@ -51,7 +57,7 @@ const socketHandler = (io) => {
         await User.findOneAndUpdate({ uid: socket.userId }, 
           { isOnline: false, lastSeen: Date.now() }
         );
-        io.emit('user: offline', socket.userId);
+        io.emit('user:offline', socket.userId);
       }
     })
   })
