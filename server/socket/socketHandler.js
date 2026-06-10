@@ -16,7 +16,7 @@ const socketHandler = (io) => {
 
     // Handling Message Sending
     socket.on('message.send', async (data) => {
-      const { conversationId, senderId, recieverId, content, type } = data;
+      const { conversationId, senderId, receiverId, content, type } = data;
       const message = await Message.create({
         conversationId, senderId, content, type
       })
@@ -25,16 +25,16 @@ const socketHandler = (io) => {
         lastMessage: content, updatedAt: Date.now()
       })
 
-      io.to(recieverId).emit('message: recieve', message);
+      io.to(receiverId).emit('message: receive', message);
     })
 
     // Typing Indicator
     socket.on('typing: start', data => {
-      socket.to(data.recieverId).emit('typing: start', data.senderId);
+      socket.to(data.receiverId).emit('typing: start', data.senderId);
     })
 
     socket.on('typing: stop', data => {
-      socket.to(data.recieverId).emit('typing: stop', data.senderId);
+      socket.to(data.receiverId).emit('typing: stop', data.senderId);
     })
 
     // Read Receipts
@@ -42,7 +42,7 @@ const socketHandler = (io) => {
       const { conversationId, userId, senderId } = data;
       await Message.updateMany({ conversationId, seenBy: { $ne: userId } }, { $push: { seenBy: userId } });
 
-      io.to(senderId).emit('messager: seen', { conversationId, userId });
+      io.to(senderId).emit('message: seen', { conversationId, userId });
     })
 
     // User goes Offline
