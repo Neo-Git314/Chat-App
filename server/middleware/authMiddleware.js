@@ -1,4 +1,4 @@
-const admin = require('firebase-admin');
+const { getAuth } = require('firebase-admin/auth');
 
 const authMiddleware = async (req, res, next) => {
   const token = req.headers.authorization?.split('Bearer ')[1];
