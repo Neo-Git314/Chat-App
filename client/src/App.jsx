@@ -19,9 +19,9 @@ const App = () => {
         <Route
           path="/"
           element={
-            <ProtectedRoute>
+            
               <Chat />
-            </ProtectedRoute>
+            
           }
         />
       </Routes>
