@@ -1,9 +1,19 @@
 const mongoose=require("mongoose");
-const messageSchema=new mongoose.Schema({
+const conversationSchema=new mongoose.Schema({
     participants:[{
-        type: mongoose.Schema.Types.ObjectId,
-        ref:"User",
+        type:String ,
+        required: true
     }],
-    lastMessage: String,
+    lastMessage: {
+        content:   { type: String, default: "" },  
+        senderId:  { type: String, default: "" },  
+        type:      { type: String, default: "text" }, 
+        timestamp: { type: Date,   default: null }   
+    },
+     unreadCount: {
+        type: Map,
+        of: Number,
+        default: {}
+    }
     }, { timestamps: true });
 module.exports = mongoose.model("Conversation", conversationSchema);

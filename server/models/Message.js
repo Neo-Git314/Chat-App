@@ -4,25 +4,27 @@ const messageSchema = new mongoose.Schema({
     conversationId:{
         type: mongoose.Schema.Types.ObjectId,
         ref:"Conversation",
+        required: true
     },
     senderId:{
-        type: mongoose.Schema.Types.ObjectId,
-        ref:"User",
+        type: String ,
+        required: true
     },
-     content: String,
+     content: {
+        type: String,
+        default: ""
+    },
      type:{
         type:String,
         enum:["text","image","file"],
         default:"text",
      },
      seenBy:[{
-        type:mongoose.Schema.Types.ObjectId,
-        ref:"User",
+        type:String,
      }],
-     timestamp: {
-    type: Date,
-    default: Date.now,
-  },
-});
+},{
+    timestamps: true
+}
+);
   module.exports = mongoose.model("Message", messageSchema);
 
