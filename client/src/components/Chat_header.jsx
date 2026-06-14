@@ -28,7 +28,7 @@ export default function ChatHeader({
       className="
         relative w-full
         bg-[#1e1840]
-        border-t-2 border-cyan-400
+        border-t-2 border-[#2d1f4e]
         px-4 py-2.5
         flex items-center gap-3
         shadow-md shadow-black/30
