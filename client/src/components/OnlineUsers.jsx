@@ -1,5 +1,5 @@
 // OnlineUsers.jsx — "ONLINE NOW" horizontal strip
-import OnlineUserCard from "./online_user_card";
+import OnlineUserCard from "./OnlineUserCard";
 
 const DEFAULT_USERS = [
   { id: 1, name: "Sarah",  initials: "SC", isOnline: true,  avatar: "" },

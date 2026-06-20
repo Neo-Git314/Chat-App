@@ -25,8 +25,8 @@ function ProfileField({ label, value }) {
   );
 }
 
-// ── UserCard ───────────────────────────────────────────────────────────────────
-export default function UserCard({
+// ── ProfileCard ───────────────────────────────────────────────────────────────────
+export default function ProfileCard({
   name     = "Alex Rivera",
   username = "@alexrivera",
   email    = "alex@email.com",

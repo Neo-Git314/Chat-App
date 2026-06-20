@@ -20,8 +20,14 @@ const socketHandler = (io) => {
 
       try {
         const message = await Message.create({ conversationId, senderId, content, type });
+
         await Conversation.findByIdAndUpdate(conversationId, {
-        lastMessage: content, updatedAt: Date.now() 
+        lastMessage: {
+          content, 
+          senderId,
+          type,
+          timestamp: message.createdAt || new Date(),
+        },
       });
         io.to(receiverId).emit('message:receive', message);
       } catch (err) {
