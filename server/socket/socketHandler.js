@@ -2,20 +2,24 @@ const Message = require('../models/Message');
 const User = require('../models/User');
 const Conversation = require('../models/Conversation');
 
+const onlineUsers = new Set();
+
 const socketHandler = (io) => {
-  io.on('connection', (socket) => {
-    console.log('User Connected:', socket.id);
+  io.on('connection', (socket) => { 
 
     // User comes Online
     socket.on('user:online', async (userId) => {
       socket.userId = userId;
       socket.join(userId);
+      onlineUsers.add(userId);
+
       await User.findOneAndUpdate({ uid: userId }, { isOnline :true });
       io.emit('user:online', userId);
+      socket.emit('online:list', Array.from(onlineUsers));
     })
 
     // Handling Message Sending
-    socket.on('message:send', async (data) => {
+    socket.on('message:send', async (data, callback) => {
       const { conversationId, senderId, receiverId, content, type } = data;
 
       try {
@@ -30,8 +34,11 @@ const socketHandler = (io) => {
         },
       });
         io.to(receiverId).emit('message:receive', message);
+
+        if (callback) callback({ success: true, messageId: message._id});
       } catch (err) {
         console.log('message:send error:', err);
+        if (callback) callback({ success: false, error: 'Failed to send message' });
       }
     })
 
@@ -60,6 +67,7 @@ const socketHandler = (io) => {
     // User goes Offline
     socket.on('disconnect', async () => {
       if (socket.userId) {
+        onlineUsers.delete(socket.userId);
         await User.findOneAndUpdate({ uid: socket.userId }, 
           { isOnline: false, lastSeen: Date.now() }
         );
