@@ -19,10 +19,10 @@ const App = () => {
         <Route
           path="/"
           element={
-            
-              <Chat />
-            
-          }
+              <ProtectedRoute>
+                <Chat />
+              </ProtectedRoute>
+              }
         />
       </Routes>
     </BrowserRouter>

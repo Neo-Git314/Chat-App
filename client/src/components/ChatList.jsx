@@ -164,24 +164,6 @@ export default function ChatList({
         </div>
       </div>
 
-      {/* Pinned Bottom Item (Robin ray) */}
-      <div className="border-t border-[#261c33] p-4 px-5">
-        <div className="flex items-center gap-3 cursor-pointer group">
-          <Avatar
-            initials="RR"
-            color="bg-[#4a5568]"
-            isOnline={true}
-            size="w-10 h-10"
-          />
-          <div className="flex flex-col">
-            <h3 className="text-white font-semibold text-sm group-hover:text-gray-200 transition-colors">
-              Robin ray
-            </h3>
-            <span className="text-[#5cd228] text-xs font-medium">Online</span>
-          </div>
-        </div>
-      </div>
-
       {/* Global styles for custom scrollbar to match the sleek design */}
       <style
         dangerouslySetInnerHTML={{

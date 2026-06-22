@@ -6,6 +6,7 @@ const onlineUsers = new Set();
 
 const socketHandler = (io) => {
   io.on('connection', (socket) => { 
+    console.log('New client connected:', socket.id);
 
     // User comes Online
     socket.on('user:online', async (userId) => {

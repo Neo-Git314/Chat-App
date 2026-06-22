@@ -22,7 +22,7 @@ const StatusIndicator = ({ status }) => {
 
   return (
     <span className={`text-[10px] leading-none ml-0.5 ${colorClass}`}>
-      {isDelivered || isRead ? "✓✓" : "✓"}
+      {isRead || isDelivered ? "✓✓" : "✓"}
     </span>
   );
 };
@@ -38,13 +38,13 @@ const Avatar = ({ initials, colorClass = "bg-purple-500" }) => (
 );
 
 const SkeletonBubble = ({ isOwn }) => (
-    
   <div className={`flex ${isOwn ? "justify-end" : "justify-start"}`}>
     <div
       className={`h-9 rounded-2xl animate-pulse
-        ${isOwn
-          ? "w-36 bg-violet-700/40 rounded-br-sm"
-          : "w-44 bg-[#2b1f4e]/70 rounded-bl-sm"
+        ${
+          isOwn
+            ? "w-36 bg-violet-700/40 rounded-br-sm"
+            : "w-44 bg-[#2b1f4e]/70 rounded-bl-sm"
         }`}
     />
   </div>

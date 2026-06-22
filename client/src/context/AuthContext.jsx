@@ -27,14 +27,10 @@ export const AuthProvider = ({ children }) => {
   // Save User to MongoDB
   const saveUserToDB = async (user, displayName) => {
     try {
-      const token = await user.getIdToken();
+      const token = await user.getIdToken(true);
       await axios.post(
-        "http://localhost:5000/api/users",
-        {
-          uid: user.uid,
-          displayName: displayName || user.displayName,
-          email: user.email,
-        },
+        "http://localhost:5000/api/users/verify",
+        {},
         {
           headers: {
             Authorization: `Bearer ${token}`,

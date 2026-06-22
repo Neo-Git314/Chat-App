@@ -66,7 +66,7 @@ const ChatFlowLogo = () => (
   </svg>
 );
 
-export default function ChatSidebar({ setView }) {
+export default function ChatSidebar({ setView, onLogout, currentUser }) {
   const [active, setActive] = useState("chats");
   const [collapsed, setCollapsed] = useState(false);
 
@@ -213,13 +213,13 @@ export default function ChatSidebar({ setView }) {
         >
           <div className="relative flex-shrink-0">
             <div className="w-8 h-8 rounded-full bg-gradient-to-br from-[#7c3aed] to-[#a78bfa] flex items-center justify-center text-white text-xs font-semibold">
-              RO
+              {currentUser?.displayName?.slice(0, 2).toUpperCase() || "U"}
             </div>
             <span className="absolute bottom-0 right-0 w-2 h-2 rounded-full bg-emerald-400 border border-[#1a1133]" />
           </div>
           {!collapsed && (
             <div className="overflow-hidden">
-              <p className="text-white text-xs font-semibold leading-tight truncate">Robin Joy</p>
+              <p className="text-white text-xs font-semibold leading-tight truncate">{currentUser?.displayName || "User"}</p>
               <p className="text-[#7c5cbf] text-[10px] leading-tight">Online</p>
             </div>
           )}
@@ -227,6 +227,7 @@ export default function ChatSidebar({ setView }) {
 
         {/* Logout */}
         <button
+          onClick={onLogout}
           className="
               group flex items-center gap-3 w-full
               px-3 py-2.5 rounded-xl

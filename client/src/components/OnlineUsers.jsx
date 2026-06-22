@@ -8,8 +8,6 @@ const DEFAULT_USERS = [
 ];
 
 export default function OnlineUsers({ onlineUsers = DEFAULT_USERS }) {
-
-     console.log(onlineUsers);
   const online = onlineUsers.filter((u) => u.isOnline);
 
   return (

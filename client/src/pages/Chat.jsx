@@ -1,15 +1,15 @@
 import { useState, useEffect } from "react";
 import axios from "axios";
-
-import MessageBubble from "../components/MessageBubble";
-import ChatHeader from "../components/ChatHeader";
-import InputMessage from "../components/InputMessage";
-import ChatList from "../components/ChatList";
 import ChatSidebar from "../components/Sidebar";
+import ChatList from "../components/ChatList";
+import ChatHeader from "../components/ChatHeader";
+import MessageBubble from "../components/MessageBubble";
+import InputMessage from "../components/InputMessage";
 import UserProfilePage from "../components/UserProfile";
 import Settings from "../components/Settings";
 import { useAuth } from "../context/AuthContext";
 import { useSocket } from "../context/SocketContext";
+import TypingIndicator from "../components/TypingIndicator";
 
 const API_URL = "http://localhost:5000";
 
@@ -17,107 +17,161 @@ const Chat = () => {
   const { currentUser, logout } = useAuth();
   const { socket } = useSocket();
 
-  const [messages, setMessages] = useState([]);
   const [view, setView] = useState("chat");
+  const [conversations, setConversations] = useState([]); // from GET /api/conversations/:uid
+  const [allUsers, setAllUsers] = useState([]); // from GET /api/users — used to start NEW chats
   const [selectedUser, setSelectedUser] = useState(null);
-  const [users, setUsers] = useState([]);
   const [conversationId, setConversationId] = useState(null);
+  const [messages, setMessages] = useState([]);
   const [onlineUserIds, setOnlineUserIds] = useState([]);
   const [messageText, setMessageText] = useState("");
+  const [isTyping, setIsTyping] = useState(false);
+
+  const authHeader = async () => {
+    const token = await currentUser.getIdToken();
+    return { headers: { Authorization: `Bearer ${token}` } };
+  };
+
+  // fetch existing conversations (sidebar list)
+  const fetchConversations = async () => {
+    try {
+      const config = await authHeader();
+      const res = await axios.get(
+        `${API_URL}/api/conversations/${currentUser.uid}`,
+        config,
+      );
+      setConversations(res.data);
+    } catch (err) {
+      console.log("fetch conversations error:", err.message);
+    }
+  };
+
+  // fetch all users (for starting a new conversation / search)
+  const fetchAllUsers = async () => {
+    try {
+      const config = await authHeader();
+      const res = await axios.get(`${API_URL}/api/users`, config);
+      setAllUsers(res.data);
+    } catch (err) {
+      console.log("fetch users error:", err.message);
+    }
+  };
 
   useEffect(() => {
-    const fetchUsers = async () => {
-      try {
-        const token = await currentUser.getIdToken();
-        const res = await axios.get(`${API_URL}/api/users`, {
-          headers: {
-            Authorization: `Bearer ${token}`,
-          },
-        });
-        const otherUsers = res.data.filter(
-          (user) => user.uid !== currentUser.uid,
-        );
-        setUsers(otherUsers);
-      } catch (error) {
-        console.error("Error fetching users:", error);
-      }
-    };
-
     if (currentUser) {
-      fetchUsers();
+      fetchConversations();
+      fetchAllUsers();
     }
   }, [currentUser]);
 
+  // listen for incoming messages
   useEffect(() => {
     if (!socket) return;
 
-    const handleReceiveMessage = (message) => {
+    const handleReceive = (message) => {
       if (message.conversationId === conversationId) {
         setMessages((prev) => [...prev, message]);
+
+        if (document.visibilityState === "visible") {
+          socket.emit("message:seen", {
+            conversationId: message.conversationId,
+            userId: currentUser.uid,
+            senderId: message.senderId,
+          });
+        }
+      }
+      // refresh conversation list so last message preview updates
+      fetchConversations();
+    };
+
+    socket.on("message:receive", handleReceive);
+    return () => socket.off("message:receive", handleReceive);
+  }, [socket, conversationId]);
+
+  // Listen for read receipts
+  useEffect(() => {
+    if (!socket) return;
+
+    const handleSeen = ({ conversationId: seenConvId, userId }) => {
+      if (seenConvId === conversationId) {
+        setMessages((prev) =>
+          prev.map((msg) =>
+            msg.seenBy?.includes(userId)
+              ? msg
+              : { ...msg, seenBy: [...(msg.seenBy || []), userId] },
+          ),
+        );
       }
     };
 
-    socket.on("message:receive", handleReceiveMessage);
-
-    return () => {
-      socket.off("message:receive", handleReceiveMessage);
-    };
+    socket.on("message:seen", handleSeen);
+    return () => socket.off("message:seen", handleSeen);
   }, [socket, conversationId]);
 
+  // listen for online/offline status
   useEffect(() => {
     if (!socket) return;
 
-    const handleUserOnline = (userId) => {
-      setOnlineUserIds((prev) => [...prev, userId]);
+    const handleOnline = (userId) => {
+      setOnlineUserIds((prev) => [...new Set([...prev, userId])]);
     };
-
-    const handleUserOffline = (userId) => {
+    const handleOffline = (userId) => {
       setOnlineUserIds((prev) => prev.filter((id) => id !== userId));
     };
+    const handleOnlineList = (userIds) => {
+      setOnlineUserIds(userIds);
+    };
 
-    socket.on("user:online", handleUserOnline);
-    socket.on("user:offline", handleUserOffline);
+    socket.on("user:online", handleOnline);
+    socket.on("user:offline", handleOffline);
+    socket.on("online:list", handleOnlineList);
 
     return () => {
-      socket.off("user:online", handleUserOnline);
-      socket.off("user:offline", handleUserOffline);
+      socket.off("user:online", handleOnline);
+      socket.off("user:offline", handleOffline);
+      socket.off("online:list", handleOnlineList);
     };
   }, [socket]);
 
+  // start or open a conversation with a user (matches Member 2's conversationRoutes.js)
   const handleSelectUser = async (user) => {
     setSelectedUser(user);
+    setIsTyping(false);
     try {
-      const token = await currentUser.getIdToken();
+      const config = await authHeader();
+
       const res = await axios.post(
         `${API_URL}/api/conversations`,
-        {
-          participantId: user.uid,
-        },
-        {
-          headers: {
-            Authorization: `Bearer ${token}`,
-          },
-        },
+        { participantId: user.uid },
+        config,
       );
+
       setConversationId(res.data._id);
 
       const msgRes = await axios.get(
         `${API_URL}/api/messages/${res.data._id}`,
-        {
-          headers: {
-            Authorization: `Bearer ${token}`,
-          },
-        },
+        config,
       );
       setMessages(msgRes.data);
-    } catch (error) {
-      console.error("Error selecting user:", error);
+
+      if (socket) {
+        socket.emit("message:seen", {
+          conversationId: res.data._id,
+          userId: currentUser.uid,
+          senderId: user.uid,
+        });
+      }
+    } catch (err) {
+      console.log("select user error:", err.message);
     }
   };
 
-  const handleSendMessage = async () => {
-    if (!socket || !messageText.trim() || !conversationId || !selectedUser)
+  // send a message
+  const handleSend = () => {
+    if (!socket || !conversationId || !selectedUser || !messageText.trim())
       return;
+
+    const tempId = Date.now(); // temporary ID for optimistic UI update
 
     const messageData = {
       conversationId,
@@ -127,94 +181,191 @@ const Chat = () => {
       type: "text",
     };
 
-    socket.emit("message:send", messageData);
-
-    setMessages((prev) => [...prev, { ...messageData, timestamp: new Date() }]);
+    setMessages((prev) => [
+      ...prev,
+      {
+        ...messageData,
+        _id: tempId,
+        createdAt: new Date(),
+        seenBy: [],
+        status: "sent",
+      },
+    ]);
     setMessageText("");
+
+  socket.emit("message:send", messageData, (res) => {
+    if (res?.success) {
+      setMessages((prev) =>
+        prev.map((msg) =>
+          msg._id === tempId
+            ? { ...msg, _id: res.messageId, status: "delivered" }
+            : msg,
+        ),
+      );
+    };
+  });
   };
 
-  const handleLogout = async () => {
-    try {
-      await logout();
-    } catch (error) {
-      console.error("Logout Error:", error);
+  const handleTypingStart = () => {
+    if (socket && selectedUser) {
+      socket.emit("typing:start", {
+        receiverId: selectedUser.uid,
+        senderId: currentUser.uid,
+      });
     }
   };
 
-  const chatListUsers = users.map((u) => ({
-    id: u.uid,
-    name: u.displayName,
-    message: "Hey there! I'm using ChatApp.",
-    time: "",
-    initials: u.displayName
-      ?.split(" ")
-      .map((n) => n[0])
-      .join("")
-      .toUpperCase(),
-    color: "#4a5568",
-    isOnline: onlineUserIds.includes(u.uid),
-    raw: u,
-  }));
+  const handleTypingStop = () => {
+    if (socket && selectedUser) {
+      socket.emit("typing:stop", {
+        receiverId: selectedUser.uid,
+        senderId: currentUser.uid,
+      });
+    }
+  };
 
-  const onlineUsersStrip = chatListUsers
+  // Handle typing indicators
+  useEffect(() => {
+    if (!socket) return;
+
+    const handleTypingStart = (senderId) => {
+      if (senderId === selectedUser?.uid) setIsTyping(true);
+    };
+    const handleTypingStop = (senderId) => {
+      if (senderId === selectedUser?.uid) setIsTyping(false);
+    };
+
+    socket.on("typing:start", handleTypingStart);
+    socket.on("typing:stop", handleTypingStop);
+
+    return () => {
+      socket.off("typing:start", handleTypingStart);
+      socket.off("typing:stop", handleTypingStop);
+    };
+  }, [socket, selectedUser]);
+
+  // Handle user logout
+  const handleLogout = async () => {
+    await logout();
+  };
+
+  // build sidebar list from real conversations (includes otherUser + lastMessage from backend)
+  const chatListUsers = conversations.map((conv) => {
+    const other = conv.otherUser || {};
+    return {
+      id: conv._id,
+      uid: other.uid,
+      name: other.displayName || "Unknown",
+      initials: other.displayName?.slice(0, 2).toUpperCase() || "??",
+      color: "bg-purple-600",
+      isOnline: onlineUserIds.includes(other.uid),
+      time: conv.lastMessage?.timestamp
+        ? new Date(conv.lastMessage.timestamp).toLocaleTimeString([], {
+            hour: "2-digit",
+            minute: "2-digit",
+          })
+        : "",
+      message: conv.lastMessage?.content || "Say hi 👋",
+      raw: other,
+    };
+  });
+
+  const onlineUsersForStrip = chatListUsers
     .filter((u) => u.isOnline)
     .map((u) => ({
-      id: u.id,
+      id: u.uid,
       name: u.name,
       initials: u.initials,
       isOnline: true,
-      color: u.color,
-      avatar: u.initials,
+      avatar: "",
     }));
 
   return (
     <div className="flex h-screen overflow-hidden">
-      <ChatSidebar setView={setView} onLogout={handleLogout} />
+      <ChatSidebar 
+      setView={setView} 
+      onLogout={handleLogout} 
+      currentUser={currentUser} />
 
       {view === "chat" && (
         <>
           <ChatList
             users={chatListUsers}
-            onlineUsers={onlineUsersStrip}
+            onlineUsers={onlineUsersForStrip}
             onSelectUser={(chatListUser) => handleSelectUser(chatListUser.raw)}
           />
 
-          <div className="flex-1 bg-[#130a1e]   flex flex-col  overflow-hidden">
+          {/* TEMPORARY — start new chat list, remove once search/new-chat UI is built */}
+          <div className="w-[260px] bg-[#0f0a1a] border-r border-[#2d1f4e] p-4 overflow-y-auto">
+            <p className="text-[#6b5a8a] text-xs font-bold uppercase tracking-wider mb-3">
+              Start New Chat (temp)
+            </p>
+            {allUsers.length === 0 && (
+              <p className="text-[#6b5a8a] text-xs italic">
+                No other users yet — sign up a second account
+              </p>
+            )}
+            {allUsers.map((u) => (
+              <div
+                key={u.uid}
+                onClick={() => handleSelectUser(u)}
+                className="flex items-center gap-2 px-2 py-2 rounded-lg hover:bg-[#1a1133] cursor-pointer mb-1"
+              >
+                <div className="w-8 h-8 rounded-full bg-purple-600 flex items-center justify-center text-white text-xs font-medium">
+                  {u.displayName?.[0]}
+                </div>
+                <span className="text-white text-sm truncate">
+                  {u.displayName}
+                </span>
+              </div>
+            ))}
+          </div>
+          <div className="flex-1 bg-[#130a1e] flex flex-col overflow-hidden">
             {selectedUser ? (
               <>
                 <ChatHeader
                   userName={selectedUser.displayName}
-                  userAvatar={selectedUser.initials}
-                  isOnline={selectedUser.isOnline}
+                  userAvatar={selectedUser.displayName
+                    ?.slice(0, 2)
+                    .toUpperCase()}
+                  isOnline={onlineUserIds.includes(selectedUser.uid)}
                 />
-
-                <div className="flex-1 p-4">
+                <div className="flex-1 p-4 overflow-y-auto space-y-2">
                   {messages.map((msg, i) => (
                     <MessageBubble
-                      key={msg.id || i}
+                      key={msg._id || i}
                       message={msg.content}
                       isOwn={msg.senderId === currentUser.uid}
+                      status={
+                        msg.senderId === currentUser.uid
+                          ? (msg.seenBy?.includes(selectedUser.uid)
+                            ? "read"
+                            : (msg.status || "delivered"))
+                          : undefined
+                      }
                       timestamp={new Date(
-                        msg.createdAt || msg.timestamp,
+                        msg.createdAt || Date.now(),
                       ).toLocaleTimeString([], {
                         hour: "2-digit",
                         minute: "2-digit",
                       })}
-                      avatar={selectedUser.initials}
+                      avatar={selectedUser.displayName?.[0]}
                     />
                   ))}
                 </div>
+                {isTyping && <TypingIndicator userName={selectedUser?.displayName} />}
                 <InputMessage
                   value={messageText}
                   onChange={(e) => setMessageText(e.target.value)}
-                  onSend={handleSendMessage}
+                  onSend={handleSend}
+                  onTypingStart={handleTypingStart}
+                  onTypingStop={handleTypingStop}
+                  placeholder="Type a message..."
                 />
               </>
             ) : (
-              <div className="flex-1 flex items-center justify-center">
-                <p className="text-[#89819e] text-sm">
-                  Select a conversation to start chatting
-                </p>
+              <div className="flex-1 flex items-center justify-center text-[#6b5a8a] text-sm">
+                Select a conversation to start chatting
               </div>
             )}
           </div>
@@ -222,13 +373,13 @@ const Chat = () => {
       )}
 
       {view === "profile" && (
-        <div className="flex-1    overflow-y-auto">
+        <div className="flex-1 overflow-y-auto">
           <UserProfilePage currentUser={currentUser} onLogout={handleLogout} />
         </div>
       )}
 
       {view === "settings" && (
-        <div className="flex-1 bg-[#130a1e] p-4    overflow-y-auto">
+        <div className="flex-1 bg-[#130a1e] p-4 overflow-y-auto">
           <Settings onLogout={handleLogout} />
         </div>
       )}

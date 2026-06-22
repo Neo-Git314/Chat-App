@@ -10,16 +10,30 @@
  */
 
 import React from "react";
+import { useRef } from "react";
 import { IoSend } from "react-icons/io5";
 
 export default function InputMessage({
   value = "",
   onChange,
   onSend,
+  onTypingStart,
+  onTypingStop,
   placeholder = "Message...",
   disabled = false,
 }) {
   const canSend = !disabled && value.trim().length > 0;
+
+  const typingTimeoutRef = useRef(null);
+
+  const handleInputChange = (e) => {
+    onChange?.(e);
+    if (onTypingStart) onTypingStart();
+    if (typingTimeoutRef.current) clearTimeout(typingTimeoutRef.current);
+    typingTimeoutRef.current = setTimeout(() => {
+      if (onTypingStop) onTypingStop();
+    }, 2000);
+  };
 
   const handleKeyDown = (e) => {
     if (e.key === "Enter" && !e.shiftKey && canSend) {
@@ -35,7 +49,7 @@ export default function InputMessage({
         <input
           type="text"
           value={value}
-          onChange={onChange}
+          onChange={handleInputChange}
           onKeyDown={handleKeyDown}
           placeholder={placeholder}
           disabled={disabled}
