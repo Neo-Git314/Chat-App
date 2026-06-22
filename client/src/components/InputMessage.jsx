@@ -32,7 +32,7 @@ export default function InputMessage({
     if (typingTimeoutRef.current) clearTimeout(typingTimeoutRef.current);
     typingTimeoutRef.current = setTimeout(() => {
       if (onTypingStop) onTypingStop();
-    }, 2000);
+    }, 1000);
   };
 
   const handleKeyDown = (e) => {

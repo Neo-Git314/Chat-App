@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 import axios from "axios";
 import ChatSidebar from "../components/Sidebar";
 import ChatList from "../components/ChatList";
@@ -26,6 +26,9 @@ const Chat = () => {
   const [onlineUserIds, setOnlineUserIds] = useState([]);
   const [messageText, setMessageText] = useState("");
   const [isTyping, setIsTyping] = useState(false);
+  const messagesEndRef = useRef(null);
+  const messagesContainerRef = useRef(null);
+  const [showScrollDown, setShowScrollDown] = useState(false);
 
   const authHeader = async () => {
     const token = await currentUser.getIdToken();
@@ -55,6 +58,24 @@ const Chat = () => {
     } catch (err) {
       console.log("fetch users error:", err.message);
     }
+  };
+
+  const scrollToBottom = () => {
+    messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
+  };
+
+  useEffect(() => {
+    if (conversationId) scrollToBottom();
+  }, [messages, conversationId]);
+
+  const handleScroll = () => {
+    const container = messagesContainerRef.current;
+    if (!container) return;
+
+    const isNearBottom =
+      container.scrollHeight - container.scrollTop - container.clientHeight <
+      100;
+    setShowScrollDown(!isNearBottom);
   };
 
   useEffect(() => {
@@ -193,17 +214,17 @@ const Chat = () => {
     ]);
     setMessageText("");
 
-  socket.emit("message:send", messageData, (res) => {
-    if (res?.success) {
-      setMessages((prev) =>
-        prev.map((msg) =>
-          msg._id === tempId
-            ? { ...msg, _id: res.messageId, status: "delivered" }
-            : msg,
-        ),
-      );
-    };
-  });
+    socket.emit("message:send", messageData, (res) => {
+      if (res?.success) {
+        setMessages((prev) =>
+          prev.map((msg) =>
+            msg._id === tempId
+              ? { ...msg, _id: res.messageId, status: "delivered" }
+              : msg,
+          ),
+        );
+      }
+    });
   };
 
   const handleTypingStart = () => {
@@ -282,10 +303,11 @@ const Chat = () => {
 
   return (
     <div className="flex h-screen overflow-hidden">
-      <ChatSidebar 
-      setView={setView} 
-      onLogout={handleLogout} 
-      currentUser={currentUser} />
+      <ChatSidebar
+        setView={setView}
+        onLogout={handleLogout}
+        currentUser={currentUser}
+      />
 
       {view === "chat" && (
         <>
@@ -320,7 +342,7 @@ const Chat = () => {
               </div>
             ))}
           </div>
-          <div className="flex-1 bg-[#130a1e] flex flex-col overflow-hidden">
+          <div className="flex-1 bg-[#130a1e] flex flex-col overflow-hidden relative">
             {selectedUser ? (
               <>
                 <ChatHeader
@@ -330,7 +352,11 @@ const Chat = () => {
                     .toUpperCase()}
                   isOnline={onlineUserIds.includes(selectedUser.uid)}
                 />
-                <div className="flex-1 p-4 overflow-y-auto space-y-2">
+                <div
+                  ref={messagesContainerRef}
+                  onScroll={handleScroll}
+                  className="flex-1 p-4 overflow-y-auto space-y-2"
+                >
                   {messages.map((msg, i) => (
                     <MessageBubble
                       key={msg._id || i}
@@ -338,9 +364,9 @@ const Chat = () => {
                       isOwn={msg.senderId === currentUser.uid}
                       status={
                         msg.senderId === currentUser.uid
-                          ? (msg.seenBy?.includes(selectedUser.uid)
+                          ? msg.seenBy?.includes(selectedUser.uid)
                             ? "read"
-                            : (msg.status || "delivered"))
+                            : msg.status || "delivered"
                           : undefined
                       }
                       timestamp={new Date(
@@ -352,8 +378,33 @@ const Chat = () => {
                       avatar={selectedUser.displayName?.[0]}
                     />
                   ))}
+                  <div ref={messagesEndRef} />
                 </div>
-                {isTyping && <TypingIndicator userName={selectedUser?.displayName} />}
+                {showScrollDown && (
+                  <button
+                    onClick={scrollToBottom}
+                    className="absolute bottom-24 right-6 w-9 h-9 bg-purple-600 hover:bg-purple-500 rounded-full flex items-center justify-center text-white shadow-lg transition-all duration-200 z-10"
+                  >
+                    <svg
+                      xmlns="http://www.w3.org/2000/svg"
+                      className="w-4 h-4"
+                      fill="none"
+                      viewBox="0 0 24 24"
+                      stroke="currentColor"
+                    >
+                      <path
+                        strokeLinecap="round"
+                        strokeLinejoin="round"
+                        strokeWidth={2}
+                        d="M19 9l-7 7-7-7"
+                      />
+                    </svg>
+                  </button>
+                )}
+
+                {isTyping && (
+                  <TypingIndicator userName={selectedUser?.displayName} />
+                )}
                 <InputMessage
                   value={messageText}
                   onChange={(e) => setMessageText(e.target.value)}
