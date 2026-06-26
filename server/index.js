@@ -27,12 +27,22 @@ const io = new Server(server, {
   cors: {
     origin: [
       "http://localhost:5173",
-      "https://your-frontend.vercel.app"
+      "https://chat-app-eight-livid-12.vercel.app/"
     ],
-    methods: ["GET", "POST", "PATCH"]
+    methods: ["GET", "POST", "PATCH"],
+    credentials: true
   }
 })
-app.use(cors());
+
+app.use(cors({
+  origin: [
+    "http://localhost:5173",
+    "https://chat-app-eight-livid-12.vercel.app/"
+  ],
+  methods: ["GET", "POST", "PATCH"],
+  credentials: true
+}));
+
 app.use(express.json());
 app.use('/api/users', userRoutes);
 app.use('/api/messages', messageRoutes);
