@@ -81,6 +81,7 @@ const Chat = () => {
         `${API_URL}/api/conversations/${currentUser.uid}`,
         config,
       );
+      console.log("Conversations response:", res.data);
       setConversations(res.data);
     } catch (err) {
       console.log("fetch conversations error:", err.message);
