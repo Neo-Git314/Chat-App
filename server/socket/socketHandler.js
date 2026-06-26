@@ -10,9 +10,12 @@ const socketHandler = (io) => {
 
     // User comes Online
     socket.on('user:online', async (userId) => {
+      console.log('User online:', userId);
       socket.userId = userId;
       socket.join(userId);
       onlineUsers.add(userId);
+
+      console.log('Current online users:', Array.from(onlineUsers));
 
       await User.findOneAndUpdate({ uid: userId }, { isOnline :true });
       io.emit('user:online', userId);
@@ -66,7 +69,8 @@ const socketHandler = (io) => {
     })
 
     // User goes Offline
-    socket.on('disconnect', async () => {
+    socket.on('disconnect', async (reason) => {
+      console.log('Client disconnected:', socket.id, 'Reason:', reason);
       if (socket.userId) {
         onlineUsers.delete(socket.userId);
         await User.findOneAndUpdate({ uid: socket.userId }, 
