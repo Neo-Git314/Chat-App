@@ -11,7 +11,7 @@ import { useAuth } from "../context/AuthContext";
 import { useSocket } from "../context/SocketContext";
 import TypingIndicator from "../components/TypingIndicator";
 
-const API_URL = "http://localhost:5000";
+const API_URL = import.meta.env.VITE_API_URL;
 
 const getDateLabel = (date) => {
   const msgDate = new Date(date);

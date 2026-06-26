@@ -29,7 +29,7 @@ export const AuthProvider = ({ children }) => {
     try {
       const token = await user.getIdToken(true);
       await axios.post(
-        "http://localhost:5000/api/users/verify",
+        `${import.meta.env.VITE_API_URL}/api/users/verify`,
         {},
         {
           headers: {
