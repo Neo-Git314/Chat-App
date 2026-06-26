@@ -13,6 +13,44 @@ import TypingIndicator from "../components/TypingIndicator";
 
 const API_URL = "http://localhost:5000";
 
+const getDateLabel = (date) => {
+  const msgDate = new Date(date);
+  const today = new Date();
+  const yesterday = new Date(today);
+  yesterday.setDate(today.getDate() - 1);
+
+  if (msgDate.toDateString() === today.toDateString()) {
+    return "Today";
+  } else if (msgDate.toDateString() === yesterday.toDateString()) {
+    return "Yesterday";
+  } else {
+    return msgDate.toLocaleDateString("en-GB", {
+      month: "short",
+      day: "numeric",
+      year: "numeric",
+    });
+  }
+};
+
+const DateDivider = ({ label }) => (
+  <div className="flex items-center gap-3 my-6">
+    <div className="flex-1 h-px bg-[#24173f]" />
+    <span
+      className="
+                px-3 py-1
+                rounded-lg
+                bg-[#24173f]
+                text-[#b3a3d1]
+                text-xs
+                font-medium
+            "
+    >
+      {label}
+    </span>
+    <div className="flex-1 h-px bg-[#24173f]" />
+  </div>
+);
+
 const Chat = () => {
   const { currentUser, logout } = useAuth();
   const { socket } = useSocket();
@@ -357,29 +395,54 @@ const Chat = () => {
                   onScroll={handleScroll}
                   className="flex-1 p-4 overflow-y-auto space-y-2"
                 >
-                  {messages.map((msg, i) => (
-                    <MessageBubble
-                      key={msg._id || i}
-                      message={msg.content}
-                      isOwn={msg.senderId === currentUser.uid}
-                      status={
-                        msg.senderId === currentUser.uid
-                          ? msg.seenBy?.includes(selectedUser.uid)
-                            ? "read"
-                            : msg.status || "delivered"
-                          : undefined
-                      }
-                      timestamp={new Date(
-                        msg.createdAt || Date.now(),
-                      ).toLocaleTimeString([], {
-                        hour: "2-digit",
-                        minute: "2-digit",
-                      })}
-                      avatar={selectedUser.displayName?.[0]}
-                    />
-                  ))}
+                  {messages.map((msg, i) => {
+                    const currentMsgDate = new Date(
+                      msg.createdAt || Date.now(),
+                    ).toDateString();
+
+                    const prevMsgDate =
+                      i > 0
+                        ? new Date(
+                            messages[i - 1].createdAt || Date.now(),
+                          ).toDateString()
+                        : null;
+
+                    const showDateDivider =
+                      i === 0 || currentMsgDate !== prevMsgDate;
+
+                    return (
+                      <div key={msg._id || i}>
+                        {showDateDivider && (
+                          <DateDivider
+                            label={getDateLabel(msg.createdAt || Date.now())}
+                          />
+                        )}
+
+                        <MessageBubble
+                          message={msg.content}
+                          isOwn={msg.senderId === currentUser.uid}
+                          status={
+                            msg.senderId === currentUser.uid
+                              ? msg.seenBy?.includes(selectedUser.uid)
+                                ? "read"
+                                : msg.status || "delivered"
+                              : undefined
+                          }
+                          timestamp={new Date(
+                            msg.createdAt || Date.now(),
+                          ).toLocaleTimeString([], {
+                            hour: "2-digit",
+                            minute: "2-digit",
+                          })}
+                          avatar={selectedUser.displayName?.[0]}
+                        />
+                      </div>
+                    );
+                  })}
+                  ;
                   <div ref={messagesEndRef} />
                 </div>
+
                 {showScrollDown && (
                   <button
                     onClick={scrollToBottom}
