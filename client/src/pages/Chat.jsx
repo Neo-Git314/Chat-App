@@ -173,12 +173,14 @@ const Chat = () => {
     if (!socket) return;
 
     const handleOnline = (userId) => {
+      console.log("User online:", userId);
       setOnlineUserIds((prev) => [...new Set([...prev, userId])]);
     };
     const handleOffline = (userId) => {
       setOnlineUserIds((prev) => prev.filter((id) => id !== userId));
     };
     const handleOnlineList = (userIds) => {
+      console.log("Online users list received:", userIds);
       setOnlineUserIds(userIds);
     };
 

@@ -14,10 +14,17 @@ export const SocketProvider = ({ children }) => {
     const newSocket = io(import.meta.env.VITE_API_URL);
     setSocket(newSocket);
 
-    newSocket.emit('user:online', currentUser.uid);
+    newSocket.emit("user:online", currentUser.uid);
+    newSocket.on("connect", () => {
+      console.log("Connected:", newSocket.id);
+    });
+
+    newSocket.on("disconnect", (reason) => {
+      console.log("Disconnected:", reason);
+    });
 
     return () => {
-      newSocket.emit('user:offline', currentUser.uid);
+      newSocket.emit("user:offline", currentUser.uid);
       newSocket.disconnect();
     };
   }, [currentUser]);
@@ -27,6 +34,6 @@ export const SocketProvider = ({ children }) => {
       {children}
     </SocketContext.Provider>
   );
-}
+};
 
 export const useSocket = () => useContext(SocketContext);
