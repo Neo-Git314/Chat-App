@@ -10,6 +10,7 @@ import Settings from "../components/Settings";
 import { useAuth } from "../context/AuthContext";
 import { useSocket } from "../context/SocketContext";
 import TypingIndicator from "../components/TypingIndicator";
+import Contacts from "../components/Contacts";
 
 const API_URL = import.meta.env.VITE_API_URL;
 
@@ -345,9 +346,11 @@ const Chat = () => {
   return (
     <div className="flex h-screen overflow-hidden">
       <ChatSidebar
+        view={view}
         setView={setView}
         onLogout={handleLogout}
         currentUser={currentUser}
+        chatCount={chatListUsers.length}
       />
 
       {view === "chat" && (
@@ -356,33 +359,9 @@ const Chat = () => {
             users={chatListUsers}
             onlineUsers={onlineUsersForStrip}
             onSelectUser={(chatListUser) => handleSelectUser(chatListUser.raw)}
+            onNewChat={() => setView("contacts")}
           />
 
-          {/* TEMPORARY — start new chat list, remove once search/new-chat UI is built */}
-          <div className="w-[260px] bg-[#0f0a1a] border-r border-[#2d1f4e] p-4 overflow-y-auto">
-            <p className="text-[#6b5a8a] text-xs font-bold uppercase tracking-wider mb-3">
-              Start New Chat (temp)
-            </p>
-            {allUsers.length === 0 && (
-              <p className="text-[#6b5a8a] text-xs italic">
-                No other users yet — sign up a second account
-              </p>
-            )}
-            {allUsers.map((u) => (
-              <div
-                key={u.uid}
-                onClick={() => handleSelectUser(u)}
-                className="flex items-center gap-2 px-2 py-2 rounded-lg hover:bg-[#1a1133] cursor-pointer mb-1"
-              >
-                <div className="w-8 h-8 rounded-full bg-purple-600 flex items-center justify-center text-white text-xs font-medium">
-                  {u.displayName?.[0]}
-                </div>
-                <span className="text-white text-sm truncate">
-                  {u.displayName}
-                </span>
-              </div>
-            ))}
-          </div>
           <div className="flex-1 bg-[#130a1e] flex flex-col overflow-hidden relative">
             {selectedUser ? (
               <>
@@ -485,6 +464,31 @@ const Chat = () => {
                 Select a conversation to start chatting
               </div>
             )}
+          </div>
+        </>
+      )}
+
+      {view === "contacts" && (
+        <>
+          <Contacts
+            users={allUsers}
+            onSelectUser={async (user) => {
+              await handleSelectUser(user);
+              setView("chat");
+            }}
+          />
+          <div className="flex-1 bg-[#0b0714] flex items-center justify-center">
+            <div className="text-center">
+              <div className="text-6xl mb-5">👥</div>
+
+              <h2 className="text-2xl font-semibold text-white">
+                Start a New Conversation
+              </h2>
+
+              <p className="text-[#8a7aa8] mt-3 max-w-md">
+                Choose a contact from the left to begin chatting.
+              </p>
+            </div>
           </div>
         </>
       )}

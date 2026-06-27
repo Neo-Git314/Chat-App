@@ -5,7 +5,15 @@ const NAV_ITEMS = [
     id: "chats",
     label: "Chats",
     icon: (
-      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={1.8} strokeLinecap="round" strokeLinejoin="round" className="w-5 h-5">
+      <svg
+        viewBox="0 0 24 24"
+        fill="none"
+        stroke="currentColor"
+        strokeWidth={1.8}
+        strokeLinecap="round"
+        strokeLinejoin="round"
+        className="w-5 h-5"
+      >
         <path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z" />
       </svg>
     ),
@@ -14,7 +22,15 @@ const NAV_ITEMS = [
     id: "contacts",
     label: "Contacts",
     icon: (
-      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={1.8} strokeLinecap="round" strokeLinejoin="round" className="w-5 h-5">
+      <svg
+        viewBox="0 0 24 24"
+        fill="none"
+        stroke="currentColor"
+        strokeWidth={1.8}
+        strokeLinecap="round"
+        strokeLinejoin="round"
+        className="w-5 h-5"
+      >
         <path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2" />
         <circle cx="9" cy="7" r="4" />
         <path d="M23 21v-2a4 4 0 0 0-3-3.87" />
@@ -26,7 +42,15 @@ const NAV_ITEMS = [
     id: "profile",
     label: "Profile",
     icon: (
-      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={1.8} strokeLinecap="round" strokeLinejoin="round" className="w-5 h-5">
+      <svg
+        viewBox="0 0 24 24"
+        fill="none"
+        stroke="currentColor"
+        strokeWidth={1.8}
+        strokeLinecap="round"
+        strokeLinejoin="round"
+        className="w-5 h-5"
+      >
         <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2" />
         <circle cx="12" cy="7" r="4" />
       </svg>
@@ -36,7 +60,15 @@ const NAV_ITEMS = [
     id: "settings",
     label: "Settings",
     icon: (
-      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={1.8} strokeLinecap="round" strokeLinejoin="round" className="w-5 h-5">
+      <svg
+        viewBox="0 0 24 24"
+        fill="none"
+        stroke="currentColor"
+        strokeWidth={1.8}
+        strokeLinecap="round"
+        strokeLinejoin="round"
+        className="w-5 h-5"
+      >
         <circle cx="12" cy="12" r="3" />
         <path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83-2.83l.06-.06A1.65 1.65 0 0 0 4.68 15a1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 2.83-2.83l.06.06A1.65 1.65 0 0 0 9 4.68a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 2.83l-.06.06A1.65 1.65 0 0 0 19.4 9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z" />
       </svg>
@@ -45,7 +77,15 @@ const NAV_ITEMS = [
 ];
 
 const LogoutIcon = () => (
-  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={1.8} strokeLinecap="round" strokeLinejoin="round" className="w-5 h-5">
+  <svg
+    viewBox="0 0 24 24"
+    fill="none"
+    stroke="currentColor"
+    strokeWidth={1.8}
+    strokeLinecap="round"
+    strokeLinejoin="round"
+    className="w-5 h-5"
+  >
     <path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4" />
     <polyline points="16 17 21 12 16 7" />
     <line x1="21" y1="12" x2="9" y2="12" />
@@ -66,12 +106,17 @@ const ChatFlowLogo = () => (
   </svg>
 );
 
-export default function ChatSidebar({ setView, onLogout, currentUser }) {
-  const [active, setActive] = useState("chats");
+export default function ChatSidebar({
+  view,
+  setView,
+  onLogout,
+  currentUser,
+  chatCount,
+}) {
+  // const [active, setActive] = useState("chats");
   const [collapsed, setCollapsed] = useState(false);
 
   return (
-
     <aside
       className={`
           relative flex flex-col h-screen
@@ -102,15 +147,22 @@ export default function ChatSidebar({ setView, onLogout, currentUser }) {
       {/* Nav Items */}
       <nav className="flex flex-col gap-1 px-3 flex-1">
         {NAV_ITEMS.map((item) => {
-          const isActive = active === item.id;
+          const isActive =
+            (item.id === "chats" && view === "chat") ||
+            (item.id === "contacts" && view === "contacts") ||
+            (item.id === "profile" && view === "profile") ||
+            (item.id === "settings" && view === "settings");
           return (
             <button
               key={item.id}
               onClick={() => {
-                setActive(item.id);
 
                 if (item.id === "chats") {
                   setView("chat");
+                }
+
+                if (item.id === "contacts") {
+                  setView("contacts");
                 }
 
                 if (item.id === "profile") {
@@ -126,11 +178,12 @@ export default function ChatSidebar({ setView, onLogout, currentUser }) {
                   group flex items-center gap-3 w-full
                   px-3 py-2.5 rounded-xl
                   transition-all duration-200 ease-out
-                  text-left relative overflow-hidden
-                  ${isActive
-                  ? "bg-[#5b21b6] text-white shadow-lg shadow-purple-900/40"
-                  : "text-[#9d8cbf] hover:bg-[#261a40] hover:text-white"
-                }
+                  text-left relative overflow-hidden cursor-pointer
+                  ${
+                    isActive
+                      ? "bg-[#5b21b6] text-white shadow-lg shadow-purple-900/40"
+                      : "text-[#9d8cbf] hover:bg-[#261a40] hover:text-white"
+                  }
                 `}
             >
               {/* Active glow strip */}
@@ -163,7 +216,7 @@ export default function ChatSidebar({ setView, onLogout, currentUser }) {
               {/* Badge example for Chats */}
               {item.id === "chats" && !collapsed && (
                 <span className="ml-auto text-[10px] font-semibold bg-[#7c3aed] text-white rounded-full px-1.5 py-0.5 leading-none">
-                  5
+                  {chatCount}
                 </span>
               )}
             </button>
@@ -178,7 +231,7 @@ export default function ChatSidebar({ setView, onLogout, currentUser }) {
           className="
               flex items-center justify-center w-full py-2 rounded-xl
               text-[#7c5cbf] hover:text-white hover:bg-[#261a40]
-              transition-all duration-200
+              transition-all duration-200 cursor-pointer
             "
           title={collapsed ? "Expand sidebar" : "Collapse sidebar"}
         >
@@ -219,7 +272,9 @@ export default function ChatSidebar({ setView, onLogout, currentUser }) {
           </div>
           {!collapsed && (
             <div className="overflow-hidden">
-              <p className="text-white text-xs font-semibold leading-tight truncate">{currentUser?.displayName || "User"}</p>
+              <p className="text-white text-xs font-semibold leading-tight truncate">
+                {currentUser?.displayName || "User"}
+              </p>
               <p className="text-[#7c5cbf] text-[10px] leading-tight">Online</p>
             </div>
           )}
@@ -240,12 +295,12 @@ export default function ChatSidebar({ setView, onLogout, currentUser }) {
             <LogoutIcon />
           </span>
           {!collapsed && (
-            <span className="text-sm font-medium whitespace-nowrap">Log out</span>
+            <span className="text-sm font-medium whitespace-nowrap">
+              Log out
+            </span>
           )}
         </button>
       </div>
     </aside>
-
-
   );
 }

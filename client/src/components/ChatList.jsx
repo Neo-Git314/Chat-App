@@ -88,12 +88,13 @@ export default function ChatList({
   users = [],
   onlineUsers = [],
   onSelectUser = () => {},
+  onNewChat = () => {},
 }) {
   const [selectedId, setSelectedId] = useState(1);
-  const [searchQuery, setSearchQuery] = useState("null");
+  const [searchQuery, setSearchQuery] = useState("");
 
   return (
-    <div className="w-[340px] h-screen bg-[#130a1e] flex flex-col font-sans -ml-2 z-10">
+    <div className="relative w-[340px] h-screen bg-[#130a1e] flex flex-col font-sans -ml-2 z-10">
       {/* Header */}
       <div className="p-5 pb-4 flex items-center gap-3 text-white">
         <svg
@@ -127,7 +128,7 @@ export default function ChatList({
           </svg>
           <input
             type="text"
-            placeholder="Search conversations..."
+            placeholder="Will implement search soon..."
             value={searchQuery}
             onChange={(e) => setSearchQuery(e.target.value)}
             className="w-full bg-[#392e4a] text-white text-sm rounded-full py-2.5 pl-10 pr-4 placeholder-[#89819e] focus:outline-none focus:ring-1 focus:ring-[#a379f8] transition-all"
@@ -163,6 +164,25 @@ export default function ChatList({
           ))}
         </div>
       </div>
+
+      <button
+        onClick={onNewChat}
+        className="
+        absolute
+        bottom-6
+        right-6
+        bg-purple-600
+        hover:bg-purple-500
+        text-white
+        rounded-full
+        px-5
+        py-3
+        shadow-xl
+        transition-all
+        cursor-pointer"
+      >
+        + New Chat
+      </button>
 
       {/* Global styles for custom scrollbar to match the sleek design */}
       <style
