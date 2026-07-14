@@ -9,6 +9,7 @@ const socketHandler = require('./socket/socketHandler');
 const userRoutes = require('./routes/userRoutes');
 const messageRoutes = require('./routes/messageRoutes')
 const conversationRoutes = require('./routes/conversationRoutes');
+const requestRoutes=require("./routes/RequestRoutes");
 const mongoose = require('mongoose');
 
 
@@ -49,6 +50,7 @@ app.use(express.json());
 app.use('/api/users', userRoutes);
 app.use('/api/messages', messageRoutes);
 app.use('/api/conversations', conversationRoutes); 
+app.use("/api/requests", requestRoutes);
 mongoose.connect(process.env.MONGO_URI)
   .then(() => console.log('MongoDB connected'))
   .catch(err => console.log('MongoDB connection error:', err));
