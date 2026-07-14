@@ -1,230 +1,162 @@
-// Settings.jsx
-// Full settings panel for ChatFlow — expandable rows, Help & Support with Log Out
-import { useState } from "react";
+import React, { useState } from 'react';
+import { useSettings } from '../context/SettingsContext';
 
-// ── Inline SVG icons ───────────────────────────────────────────────────────────
-const ico = {
-  width: 16, height: 16, viewBox: "0 0 24 24",
-  fill: "none", stroke: "white",
-  strokeWidth: 1.8, strokeLinecap: "round", strokeLinejoin: "round",
-};
+import SectionHeader from './settings/SectionHeader';
+import SettingRow from './settings/SettingRow';
+import ToggleSwitch from './settings/ToggleSwitch';
+import ThemeSelector from './settings/ThemeSelector';
+import ColorPicker from './settings/ColorPicker';
+import WallpaperPicker from './settings/WallpaperPicker';
+import FontSizeSelector from './settings/FontSizeSelector';
+import BubbleStyleSelector from './settings/BubbleStyleSelector';
+import DensitySelector from './settings/DensitySelector';
+import StorageCard from './settings/StorageCard';
+import ConfirmationModal from './settings/ConfirmationModal';
+import AboutModal from './settings/AboutModal';
 
-const Icons = {
-  Shield: () => (
-    <svg {...ico}>
-      <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z" />
-    </svg>
-  ),
-  Bell: () => (
-    <svg {...ico}>
-      <path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9" />
-      <path d="M13.73 21a2 2 0 0 1-3.46 0" />
-    </svg>
-  ),
-  Palette: () => (
-    <svg {...ico}>
-      <circle cx="12" cy="12" r="10" />
-      <circle cx="8.5"  cy="13.5" r="1.5" />
-      <circle cx="15"   cy="9.5"  r="1.5" />
-      <circle cx="15"   cy="15"   r="1.5" />
-    </svg>
-  ),
-  Monitor: () => (
-    <svg {...ico}>
-      <rect x="2" y="3" width="20" height="14" rx="2" />
-      <path d="M8 21h8M12 17v4" />
-    </svg>
-  ),
-  Database: () => (
-    <svg {...ico}>
-      <ellipse cx="12" cy="5"  rx="9" ry="3" />
-      <path d="M21 12c0 1.66-4 3-9 3s-9-1.34-9-3" />
-      <path d="M3 5v14c0 1.66 4 3 9 3s9-1.34 9-3V5" />
-    </svg>
-  ),
-  Help: () => (
-    <svg {...ico}>
-      <circle cx="12" cy="12" r="10" />
-      <path d="M9.09 9a3 3 0 0 1 5.83 1c0 2-3 3-3 3" />
-      <line x1="12" y1="17" x2="12.01" y2="17" />
-    </svg>
-  ),
-  Logout: () => (
-    <svg {...ico} stroke="#ef4444">
-      <path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4" />
-      <polyline points="16 17 21 12 16 7" />
-      <line x1="21" y1="12" x2="9" y2="12" />
-    </svg>
-  ),
-  ChevronRight: () => (
-    <svg width={14} height={14} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2.2} strokeLinecap="round" strokeLinejoin="round">
-      <path d="M9 18l6-6-6-6" />
-    </svg>
-  ),
-  ChevronDown: () => (
-    <svg width={14} height={14} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2.2} strokeLinecap="round" strokeLinejoin="round">
-      <path d="M6 9l6 6 6-6" />
-    </svg>
-  ),
-};
+const Settings = () => {
+  const { settings, updateSetting, resetSettings } = useSettings();
+  
+  // Modal States
+  const [cacheModalOpen, setCacheModalOpen] = useState(false);
+  const [resetModalOpen, setResetModalOpen] = useState(false);
+  const [aboutModal, setAboutModal] = useState({ isOpen: false, title: '', content: '' });
 
-// ── SettingRow — single expandable row ────────────────────────────────────────
-function SettingRow({ icon: Icon, title, subtitle, expandable = false, children }) {
-  const [open, setOpen] = useState(false);
+  const handleClearCache = () => {
+    setCacheModalOpen(false);
+    // Dummy cache clear logic (UI only)
+    alert("App cache cleared successfully.");
+  };
+
+  const handleResetSettings = () => {
+    resetSettings();
+    setResetModalOpen(false);
+  };
+
+  const openPrivacyPolicy = () => {
+    setAboutModal({
+      isOpen: true,
+      title: 'Privacy Policy',
+      content: 'Your privacy is critically important to us. \n\nThis application is a frontend-only demonstration. No user data is collected, stored on external servers, or processed. All settings are saved locally on your device via LocalStorage.'
+    });
+  };
+
+  const openTerms = () => {
+    setAboutModal({
+      isOpen: true,
+      title: 'Terms & Conditions',
+      content: 'By using this application, you agree to have fun testing this React + Tailwind CSS layout. \n\nThis is a mock application provided "as-is" without any warranties.'
+    });
+  };
 
   return (
-    <div
-      className={`
-        bg-[#120d26] rounded-xl border transition-all duration-200
-        ${open ? "border-[#5b21b6]" : "border-[#2d1f4e] hover:border-[#3d2860]"}
-        overflow-hidden
-      `}
-    >
-      {/* Row trigger */}
-      <button
-        onClick={() => expandable && setOpen((v) => !v)}
-        className={`
-          w-full flex items-center gap-3.5 px-5 py-4 text-left
-          transition-colors duration-150
-          ${expandable ? "cursor-pointer" : "cursor-default"}
-          ${open ? "bg-[#1a1133]" : "hover:bg-[#160f2a]"}
-        `}
-      >
-        {/* Icon bubble */}
-        <div className="w-9 h-9 rounded-full bg-[#5b21b6] flex items-center justify-center flex-shrink-0 shadow-md shadow-purple-900/40">
-          <Icon />
+    <div className="h-full w-full bg-white dark:bg-gray-900 overflow-y-auto">
+      <div className="max-w-3xl mx-auto p-6 pb-20">
+        <h2 className="text-2xl font-bold text-gray-900 dark:text-white mb-6">Settings</h2>
+
+        {/* 1. Privacy */}
+        <SectionHeader title="Privacy" description="Manage your privacy preferences and app security." />
+        <SettingRow title="App Lock" description="Require biometric or password to open the app.">
+          <ToggleSwitch checked={settings.appLock} onChange={(val) => updateSetting('appLock', val)} />
+        </SettingRow>
+        <SettingRow title="Hide Sensitive Content" description="Blur media in chats until clicked.">
+          <ToggleSwitch checked={settings.hideSensitiveContent} onChange={(val) => updateSetting('hideSensitiveContent', val)} />
+        </SettingRow>
+
+        {/* 2. Notifications */}
+        <SectionHeader title="Notifications" description="Customize how you receive alerts." />
+        <SettingRow title="Enable Notifications" description="Receive push notifications for new messages.">
+          <ToggleSwitch checked={settings.enableNotifications} onChange={(val) => updateSetting('enableNotifications', val)} />
+        </SettingRow>
+        <SettingRow title="Notification Sound" description="Play a sound when a message is received.">
+          <ToggleSwitch checked={settings.notificationSound} onChange={(val) => updateSetting('notificationSound', val)} />
+        </SettingRow>
+        <SettingRow title="Desktop Notifications" description="Show native desktop alerts.">
+          <ToggleSwitch checked={settings.desktopNotifications} onChange={(val) => updateSetting('desktopNotifications', val)} />
+        </SettingRow>
+        <SettingRow title="Message Preview" description="Show message text inside the notification.">
+          <ToggleSwitch checked={settings.messagePreview} onChange={(val) => updateSetting('messagePreview', val)} />
+        </SettingRow>
+
+        {/* 3. Chat Appearance */}
+        <SectionHeader title="Chat Appearance" description="Customize the look and feel of your chats." />
+        <SettingRow title="Theme" description="Switch between Light and Dark mode.">
+          <ThemeSelector />
+        </SettingRow>
+        <SettingRow title="Accent Color" description="Choose the primary color for buttons and highlights.">
+          <ColorPicker />
+        </SettingRow>
+        <SettingRow title="Chat Wallpaper" description="Select a background for your chat windows.">
+          <WallpaperPicker />
+        </SettingRow>
+        <SettingRow title="Font Size" description="Adjust the text size in conversations.">
+          <FontSizeSelector />
+        </SettingRow>
+        <SettingRow title="Message Bubble Style" description="Choose how message containers look.">
+          <BubbleStyleSelector />
+        </SettingRow>
+        <SettingRow title="Chat Density" description="Adjust the spacing between messages.">
+          <DensitySelector />
+        </SettingRow>
+
+        {/* 4. Storage & Data */}
+        <SectionHeader title="Storage & Data" description="Manage network usage and local storage." />
+        <StorageCard />
+        <SettingRow title="Auto-download Media" description="Automatically download photos and videos over Wi-Fi.">
+          <ToggleSwitch checked={settings.autoDownloadMedia} onChange={(val) => updateSetting('autoDownloadMedia', val)} />
+        </SettingRow>
+        <div className="mt-4 flex flex-col sm:flex-row gap-3">
+          <button onClick={() => setCacheModalOpen(true)} className="px-4 py-2 text-sm font-medium text-gray-700 bg-gray-100 hover:bg-gray-200 rounded-md dark:bg-gray-800 dark:text-gray-300 dark:hover:bg-gray-700 transition-colors">
+            Clear Cache
+          </button>
+          <button onClick={() => setResetModalOpen(true)} className="px-4 py-2 text-sm font-medium text-red-600 bg-red-50 hover:bg-red-100 rounded-md dark:bg-red-900/20 dark:hover:bg-red-900/40 transition-colors">
+            Reset All Settings
+          </button>
         </div>
 
-        {/* Text */}
-        <div className="flex-1 min-w-0">
-          <p className="text-white text-sm font-semibold leading-tight">{title}</p>
-          {subtitle && (
-            <p className="text-[#6b5a8a] text-xs mt-0.5 leading-snug">{subtitle}</p>
-          )}
+        {/* 5. About */}
+        <SectionHeader title="About" description="App information and legal policies." />
+        <div className="space-y-2 mt-4">
+          <div className="flex justify-between items-center py-2">
+            <span className="text-sm text-gray-700 dark:text-gray-300">App Version</span>
+            <span className="text-sm font-medium text-gray-500">v2.4.1</span>
+          </div>
+          <div className="flex justify-between items-center py-2">
+            <span className="text-sm text-gray-700 dark:text-gray-300">Keyboard Shortcuts</span>
+            <span className="text-sm font-medium text-gray-500">Cmd/Ctrl + K</span>
+          </div>
+          <div className="flex flex-col sm:flex-row gap-4 pt-4">
+            <button onClick={openPrivacyPolicy} className="text-sm font-medium text-[var(--accent-color)] hover:underline text-left">Privacy Policy</button>
+            <button onClick={openTerms} className="text-sm font-medium text-[var(--accent-color)] hover:underline text-left">Terms & Conditions</button>
+          </div>
         </div>
+      </div>
 
-        {/* Chevron */}
-        <span className={`text-[#5c4a7a] transition-transform duration-200 ${open ? "rotate-0" : ""}`}>
-          {expandable
-            ? (open ? <Icons.ChevronDown /> : <Icons.ChevronDown />)
-            : <Icons.ChevronRight />}
-        </span>
-      </button>
-
-      {/* Expandable content */}
-      {expandable && open && (
-        <div className="border-t border-[#2d1f4e] animate-in fade-in slide-in-from-top-1 duration-200">
-          {children}
-        </div>
-      )}
+      {/* Modals */}
+      <ConfirmationModal 
+        isOpen={cacheModalOpen} 
+        title="Clear Cache" 
+        message="Are you sure you want to clear the app cache? This will not delete your messages or settings." 
+        confirmText="Clear" 
+        onConfirm={handleClearCache} 
+        onCancel={() => setCacheModalOpen(false)} 
+      />
+      <ConfirmationModal 
+        isOpen={resetModalOpen} 
+        title="Reset Settings" 
+        message="This will reset all your personalized settings to their default values. This action cannot be undone." 
+        confirmText="Reset" 
+        onConfirm={handleResetSettings} 
+        onCancel={() => setResetModalOpen(false)} 
+      />
+      <AboutModal
+        isOpen={aboutModal.isOpen}
+        title={aboutModal.title}
+        content={aboutModal.content}
+        onClose={() => setAboutModal({ ...aboutModal, isOpen: false })}
+      />
     </div>
   );
-}
+};
 
-// ── SETTINGS_CONFIG — drives all rows declaratively ───────────────────────────
-const SETTINGS_CONFIG = [
-  {
-    id: "privacy",
-    icon: Icons.Shield,
-    title: "Privacy & Security",
-    subtitle: "Blocked contacts and encryption",
-    expandable: false,
-  },
-  {
-    id: "notifications",
-    icon: Icons.Bell,
-    title: "Notifications",
-    subtitle: "Message alerts and sounds",
-    expandable: false,
-  },
-  {
-    id: "appearance",
-    icon: Icons.Palette,
-    title: "Chat Appearance",
-    subtitle: "Wallpaper and themes",
-    expandable: false,
-  },
-  {
-    id: "devices",
-    icon: Icons.Monitor,
-    title: "Linked Devices",
-    subtitle: "Desktop and browser sessions",
-    expandable: false,
-  },
-  {
-    id: "storage",
-    icon: Icons.Database,
-    title: "Storage & Data",
-    subtitle: "Media and cache management",
-    expandable: false,
-  },
-  {
-    id: "help",
-    icon: Icons.Help,
-    title: "Help & Support",
-    subtitle: null,
-    expandable: true,
-  },
-];
-
-// ── LogoutButton — inside Help & Support expand ────────────────────────────────
-function LogoutButton({ onLogout }) {
-  return (
-    <button
-      onClick={onLogout}
-      className="
-        w-full flex items-center gap-3.5 px-5 py-4
-        hover:bg-[#2d0e0e] transition-colors duration-150 group
-        text-left
-      "
-    >
-      <div className="w-9 h-9 rounded-full bg-[#3b0d0d] flex items-center justify-center flex-shrink-0 group-hover:bg-[#4c1111] transition-colors duration-150">
-        <Icons.Logout />
-      </div>
-      <div>
-        <p className="text-[#ef4444] text-sm font-semibold leading-tight group-hover:text-red-300 transition-colors duration-150">
-          Log out
-        </p>
-        <p className="text-[#6b5a8a] text-xs mt-0.5">Sign out from this device securely</p>
-      </div>
-    </button>
-  );
-}
-
-// ── Settings — main export ─────────────────────────────────────────────────────
-export default function Settings({ onLogout }) {
-  return (
-    <section
-      className="
-        flex-1 bg-[#1a1133] border border-[#2d1f4e] rounded-2xl
-        p-6 flex flex-col gap-5
-        shadow-xl shadow-black/40
-        min-w-0
-      "
-    >
-      {/* Panel header */}
-      <div>
-        <h2 className="text-white font-bold text-xl leading-tight tracking-tight">Settings</h2>
-        <p className="text-[#6b5a8a] text-xs mt-1">Manage your chat application preferences</p>
-      </div>
-
-      {/* Settings rows */}
-      <div className="flex flex-col gap-3">
-        {SETTINGS_CONFIG.map((row) => (
-          <SettingRow
-            key={row.id}
-            icon={row.icon}
-            title={row.title}
-            subtitle={row.subtitle}
-            expandable={row.expandable}
-          >
-            {/* Help & Support expand content */}
-            {row.id === "help" && (
-              <LogoutButton onLogout={onLogout} />
-            )}
-          </SettingRow>
-        ))}
-      </div>
-    </section>
-  );
-}
+export default Settings;

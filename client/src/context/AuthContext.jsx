@@ -5,6 +5,7 @@ import {
   signInWithEmailAndPassword,
   createUserWithEmailAndPassword,
   updateProfile,
+  updateEmail,
   signOut,
   signInWithPopup,
 } from "firebase/auth";
@@ -81,6 +82,34 @@ export const AuthProvider = ({ children }) => {
     }
   };
 
+  // Update Profile (displayName / email)
+  const updateUserProfile = async (updates) => {
+    const user = auth.currentUser;
+    if (!user) throw new Error("Not authenticated");
+    try {
+      if (updates.displayName !== undefined) {
+        await updateProfile(user, { displayName: updates.displayName });
+      }
+      if (updates.email !== undefined && updates.email !== user.email) {
+        await updateEmail(user, updates.email);
+      }
+      await user.reload();
+      setCurrentUser({ ...auth.currentUser });
+    } catch (error) {
+      console.error("Update Profile Error:", error);
+      if (error.code === "auth/requires-recent-login") {
+        throw new Error("Please log out and back in to change this.");
+      }
+      if (error.code === "auth/email-already-in-use") {
+        throw new Error("That email is already in use.");
+      }
+      if (error.code === "auth/invalid-email") {
+        throw new Error("Enter a valid email address.");
+      }
+      throw new Error(error.message || "Failed to update profile.");
+    }
+  };
+
   // Logout
   const logout = async () => {
     try {
@@ -98,6 +127,7 @@ export const AuthProvider = ({ children }) => {
         login,
         signup,
         signInWithGoogle,
+        updateUserProfile,
         logout,
       }}
     >

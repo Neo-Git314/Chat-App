@@ -35,20 +35,20 @@ const getDateLabel = (date) => {
 
 const DateDivider = ({ label }) => (
   <div className="flex items-center gap-3 my-6">
-    <div className="flex-1 h-px bg-[#24173f]" />
+    <div className="flex-1 h-px bg-border" />
     <span
       className="
                 px-3 py-1
                 rounded-lg
-                bg-[#24173f]
-                text-[#b3a3d1]
+                bg-surface-secondary
+                text-text-secondary
                 text-xs
                 font-medium
             "
     >
       {label}
     </span>
-    <div className="flex-1 h-px bg-[#24173f]" />
+    <div className="flex-1 h-px bg-border" />
   </div>
 );
 
@@ -320,7 +320,7 @@ const Chat = () => {
       uid: other.uid,
       name: other.displayName || "Unknown",
       initials: other.displayName?.slice(0, 2).toUpperCase() || "??",
-      color: "bg-purple-600",
+      color: "bg-primary",
       isOnline: onlineUserIds.includes(other.uid),
       time: conv.lastMessage?.timestamp
         ? new Date(conv.lastMessage.timestamp).toLocaleTimeString([], {
@@ -362,7 +362,7 @@ const Chat = () => {
             onNewChat={() => setView("contacts")}
           />
 
-          <div className="flex-1 bg-[#130a1e] flex flex-col overflow-hidden relative">
+          <div className="flex-1 bg-background flex flex-col overflow-hidden relative">
             {selectedUser ? (
               <>
                 <ChatHeader
@@ -428,7 +428,7 @@ const Chat = () => {
                 {showScrollDown && (
                   <button
                     onClick={scrollToBottom}
-                    className="absolute bottom-24 right-6 w-9 h-9 bg-purple-600 hover:bg-purple-500 rounded-full flex items-center justify-center text-white shadow-lg transition-all duration-200 z-10"
+                    className="absolute bottom-24 right-6 w-9 h-9 bg-primary hover:bg-primary-hover rounded-full flex items-center justify-center text-white shadow-lg shadow-primary/25 hover:-translate-y-0.5 transition-all duration-200 z-10"
                   >
                     <svg
                       xmlns="http://www.w3.org/2000/svg"
@@ -460,7 +460,16 @@ const Chat = () => {
                 />
               </>
             ) : (
-              <div className="flex-1 flex items-center justify-center text-[#6b5a8a] text-sm">
+              <div className="flex-1 flex flex-col items-center justify-center text-text-muted text-sm gap-3">
+                <svg
+                  viewBox="0 0 24 24"
+                  fill="none"
+                  stroke="currentColor"
+                  strokeWidth={1.5}
+                  className="w-12 h-12 text-accent"
+                >
+                  <path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z" />
+                </svg>
                 Select a conversation to start chatting
               </div>
             )}
@@ -477,15 +486,15 @@ const Chat = () => {
               setView("chat");
             }}
           />
-          <div className="flex-1 bg-[#0b0714] flex items-center justify-center">
+          <div className="flex-1 bg-background flex items-center justify-center">
             <div className="text-center">
               <div className="text-6xl mb-5">👥</div>
 
-              <h2 className="text-2xl font-semibold text-white">
+              <h2 className="text-2xl font-semibold text-text-primary">
                 Start a New Conversation
               </h2>
 
-              <p className="text-[#8a7aa8] mt-3 max-w-md">
+              <p className="text-text-secondary mt-3 max-w-md">
                 Choose a contact from the left to begin chatting.
               </p>
             </div>
@@ -500,7 +509,7 @@ const Chat = () => {
       )}
 
       {view === "settings" && (
-        <div className="flex-1 bg-[#130a1e] p-4 overflow-y-auto">
+        <div className="flex-1 bg-background p-4 overflow-y-auto">
           <Settings onLogout={handleLogout} />
         </div>
       )}

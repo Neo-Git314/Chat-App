@@ -10,14 +10,14 @@ export default function Contacts({ users, onSelectUser }) {
     (user.displayName || "").toLowerCase().includes(searchQuery.toLowerCase()),
   );
   return (
-    <div className="w-[340px] bg-[#0f0a1a] border-r border-[#2d1f4e] p-4 overflow-y-auto">
-      <p className="text-[#6b5a8a] text-xs font-bold uppercase tracking-wider mb-3">
+    <div className="w-[340px] bg-surface border-r border-border p-4 overflow-y-auto">
+      <p className="text-text-muted text-xs font-bold uppercase tracking-wider mb-3">
         Contacts
       </p>
       <div className="mb-5">
         <div className="relative">
           <svg
-            className="w-5 h-5 absolute left-3 top-2.5 text-[#89819e]"
+            className="w-4.5 h-4.5 absolute left-3.5 top-1/2 -translate-y-1/2 text-text-muted"
             fill="none"
             stroke="currentColor"
             viewBox="0 0 24 24"
@@ -37,22 +37,25 @@ export default function Contacts({ users, onSelectUser }) {
             onChange={(e) => setSearchQuery(e.target.value)}
             className="
               w-full
-              bg-[#392e4a]
-              text-white
+              bg-surface-secondary
+              text-text-primary
               text-sm
               rounded-full
               py-2.5
               pl-10
               pr-4
-              placeholder-[#89819e]
+              placeholder-text-muted
+              border border-transparent
               focus:outline-none
-              focus:ring-1
-              focus:ring-[#a379f8]"
+              focus:ring-2
+              focus:ring-primary/30
+              focus:border-primary/40
+              transition-all"
           />
         </div>
       </div>
       {filteredUsers.length === 0 && (
-        <p className="text-[#6b5a8a] text-xs italic">
+        <p className="text-text-muted text-xs italic">
           No users found. Try searching for a different name.
         </p>
       )}
@@ -60,12 +63,12 @@ export default function Contacts({ users, onSelectUser }) {
         <div
           key={u.uid}
           onClick={() => onSelectUser(u)}
-          className="flex items-center gap-2 px-2 py-2 rounded-lg hover:bg-[#1a1133] cursor-pointer mb-1"
+          className="flex items-center gap-2 px-2 py-2 rounded-xl hover:bg-surface-secondary cursor-pointer mb-1 transition-colors duration-150"
         >
-          <div className="w-8 h-8 rounded-full bg-purple-600 flex items-center justify-center text-white text-xs font-medium">
+          <div className="w-8 h-8 rounded-full bg-primary flex items-center justify-center text-white text-xs font-medium">
             {u.displayName ? u.displayName[0] : u.email[0]}
           </div>
-          <span className="text-white text-sm truncate">{u.displayName}</span>
+          <span className="text-text-primary text-sm truncate">{u.displayName}</span>
         </div>
       ))}
     </div>

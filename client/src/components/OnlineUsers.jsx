@@ -13,7 +13,7 @@ export default function OnlineUsers({ onlineUsers = DEFAULT_USERS }) {
   return (
     <section className="px-4 py-3">
       {/* Section heading */}
-      <p className="text-[10px] font-bold tracking-[0.13em] uppercase text-[#5c4a7a] mb-3 select-none">
+      <p className="text-[10px] font-bold tracking-[0.13em] uppercase text-text-muted mb-3 select-none">
         Online Now
       </p>
 
@@ -24,7 +24,7 @@ export default function OnlineUsers({ onlineUsers = DEFAULT_USERS }) {
             <OnlineUserCard key={user.id} user={user} />
           ))
         ) : (
-          <p className="text-[#5c4a7a] text-xs italic">No one online yet</p>
+          <p className="text-text-muted text-xs italic">No one online yet</p>
         )}
       </div>
     </section>

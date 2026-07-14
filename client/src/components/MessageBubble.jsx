@@ -5,18 +5,18 @@
  *
  * Props:
  *  message    {string}  – The message text. Pass empty string or undefined for a skeleton bubble.
- *  isOwn      {bool}    – true = sent (right, violet); false = received (left, dark indigo).
+ *  isOwn      {bool}    – true = sent (right, warm orange); false = received (left, cream).
  *  timestamp  {string}  – Display time string, e.g. "3:29 PM".
  *  status     {string}  – "read" | "delivered" | "sent"  (only visible on own messages).
  *  avatar     {string}  – Initials shown on received bubbles, e.g. "SC".
- *  avatarColor{string}  – Tailwind bg class for the avatar circle, e.g. "bg-purple-500".
+ *  avatarColor{string}  – Tailwind bg class for the avatar circle, e.g. "bg-primary".
  *  senderName {string}  – (optional) displayed above received bubble when needed.
  */
 
 const StatusIndicator = ({ status }) => {
   const isRead = status === "read";
   const isDelivered = status === "delivered";
-  const colorClass = isRead ? "text-violet-400" : "text-slate-500";
+  const colorClass = isRead ? "text-primary" : "text-text-muted";
 
   if (!status) return null;
 
@@ -27,7 +27,7 @@ const StatusIndicator = ({ status }) => {
   );
 };
 
-const Avatar = ({ initials, colorClass = "bg-purple-500" }) => (
+const Avatar = ({ initials, colorClass = "bg-primary" }) => (
   <div
     className={`w-8 h-8 rounded-full flex-shrink-0 flex items-center justify-center
                 text-[11px] font-bold text-white select-none ${colorClass}`}
@@ -43,8 +43,8 @@ const SkeletonBubble = ({ isOwn }) => (
       className={`h-9 rounded-2xl animate-pulse
         ${
           isOwn
-            ? "w-36 bg-violet-700/40 rounded-br-sm"
-            : "w-44 bg-[#2b1f4e]/70 rounded-bl-sm"
+            ? "w-36 bg-primary/30 rounded-br-sm"
+            : "w-44 bg-surface-secondary rounded-bl-sm"
         }`}
     />
   </div>
@@ -56,7 +56,7 @@ export default function MessageBubble({
   timestamp,
   status,
   avatar,
-  avatarColor = "bg-purple-500",
+  avatarColor = "bg-primary",
   senderName,
 }) {
   const isEmpty = !message || message.trim() === "";
@@ -72,9 +72,9 @@ export default function MessageBubble({
         <div className="flex flex-col items-end max-w-[65%]">
           {/* Bubble */}
           <div
-            className="bg-violet-600 text-white text-sm leading-snug
+            className="bg-primary text-white text-sm leading-snug
                        px-4 py-2.5 rounded-2xl rounded-br-sm
-                       shadow-md shadow-violet-900/30 break-words"
+                       shadow-sm shadow-primary/20 break-words"
           >
             {message}
           </div>
@@ -83,7 +83,7 @@ export default function MessageBubble({
           {(timestamp || status) && (
             <div className="flex items-center gap-0.5 mt-1 px-0.5">
               {timestamp && (
-                <time className="text-[10px] text-slate-500 leading-none">
+                <time className="text-[10px] text-text-muted leading-none">
                   {timestamp}
                 </time>
               )}
@@ -108,23 +108,23 @@ export default function MessageBubble({
       <div className="flex flex-col items-start max-w-[65%]">
         {/* Optional sender name */}
         {senderName && (
-          <span className="text-[11px] text-violet-300 font-medium mb-0.5 px-1">
+          <span className="text-[11px] text-primary font-medium mb-0.5 px-1">
             {senderName}
           </span>
         )}
 
         {/* Bubble */}
         <div
-          className="bg-[#2b1f4e] text-slate-200 text-sm leading-snug
+          className="bg-surface-secondary text-text-primary text-sm leading-snug
                      px-4 py-2.5 rounded-2xl rounded-bl-sm
-                     shadow break-words"
+                     border border-border break-words"
         >
           {message}
         </div>
 
         {/* Timestamp */}
         {timestamp && (
-          <time className="text-[10px] text-slate-600 mt-1 px-0.5 leading-none">
+          <time className="text-[10px] text-text-muted mt-1 px-0.5 leading-none">
             {timestamp}
           </time>
         )}

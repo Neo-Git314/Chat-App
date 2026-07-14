@@ -2,86 +2,6 @@ import React, { useState } from "react";
 import ChatItem from "./ChatItem";
 import OnlineUsers from "./OnlineUsers";
 
-// --- Mock Data ---
-// const ONLINE_USERS = [
-//   {
-//     id: 1,
-//     name: "Sarah",
-//     initials: "SC",
-//     color: "bg-[#d93fa5]",
-//     isOnline: true,
-//   },
-//   { id: 2, name: "Priya", initials: "PS", color: "bg-[#38b196]" },
-//   { id: 3, name: "Luna", initials: "LP", color: "bg-[#5cd228]" },
-// ];
-
-// const CHAT_HISTORY = [
-//   {
-//     id: 1,
-//     name: "Sarah Chen",
-//     initials: "SC",
-//     color: "bg-[#d93fa5]",
-//     isOnline: true,
-//     time: "3:29PM",
-//     message: "No rush , just whenever you get a change 🙏",
-//   },
-//   {
-//     id: 2,
-//     name: "Marcus",
-//     initials: "MT",
-//     color: "bg-[#89819e]",
-//     isOnline: false,
-//     time: "1:01PM",
-//     message: "you: yo wassup😁",
-//   },
-//   {
-//     id: 3,
-//     name: "Priya Sharma",
-//     initials: "PS",
-//     color: "bg-[#38b196]",
-//     isOnline: false,
-//     time: "3:31PM",
-//     message: "listen , i know the alphabet , crazy ik but ...",
-//   },
-//   {
-//     id: 4,
-//     name: "james wond",
-//     initials: "JW",
-//     color: "bg-[#f7b600]",
-//     isOnline: false,
-//     time: "11:41AM",
-//     message: "you: i watched that movie and ..",
-//   },
-//   {
-//     id: 5,
-//     name: "Luna Park",
-//     initials: "LP",
-//     color: "bg-[#5cd228]",
-//     isOnline: false,
-//     time: "3:36PM",
-//     message: "i parked my car in your house and i think that ...",
-//   },
-// ];
-
-// --- Reusable Components ---
-
-const StatusDot = ({ isOnline, className = "" }) => (
-  <div
-    className={`absolute bottom-0 right-0 w-3 h-3 rounded-full border-2 border-[#130a1e] ${isOnline ? "bg-[#5cd228]" : "bg-[#6b627d]"} ${className}`}
-  ></div>
-);
-
-const Avatar = ({ initials, color, isOnline, size = "w-10 h-10" }) => (
-  <div className="relative">
-    <div
-      className={`${size} ${color} rounded-full flex items-center justify-center text-white font-semibold text-sm`}
-    >
-      {initials}
-    </div>
-    <StatusDot isOnline={isOnline} />
-  </div>
-);
-
 // --- Main ChatList Component ---
 
 export default function ChatList({
@@ -94,27 +14,27 @@ export default function ChatList({
   const [searchQuery, setSearchQuery] = useState("");
 
   return (
-    <div className="relative w-[340px] h-screen bg-[#130a1e] flex flex-col font-sans -ml-2 z-10">
+    <div className="relative w-[340px] h-screen bg-surface border-r border-border flex flex-col font-sans z-10">
       {/* Header */}
-      <div className="p-5 pb-4 flex items-center gap-3 text-white">
+      <div className="p-5 pb-4 flex items-center gap-3">
         <svg
           viewBox="0 0 24 24"
           fill="currentColor"
-          className="w-8 h-8 text-[#a379f8]"
+          className="w-7 h-7 text-primary"
         >
           <path d="M20 2H4c-1.1 0-2 .9-2 2v18l4-4h14c1.1 0 2-.9 2-2V4c0-1.1-.9-2-2-2z" />
           <circle cx="8" cy="10" r="1.5" fill="#fff" />
           <circle cx="12" cy="10" r="1.5" fill="#fff" />
           <circle cx="16" cy="10" r="1.5" fill="#fff" />
         </svg>
-        <h1 className="text-xl font-bold tracking-wide">ChatFlow</h1>
+        <h1 className="text-xl font-bold tracking-tight text-text-primary">ChatFlow</h1>
       </div>
 
       {/* Search Bar */}
-      <div className="px-5 pb-6">
+      <div className="px-5 pb-5">
         <div className="relative">
           <svg
-            className="w-5 h-5 absolute left-3 top-2.5 text-[#89819e]"
+            className="w-4.5 h-4.5 absolute left-3.5 top-1/2 -translate-y-1/2 text-text-muted"
             fill="none"
             stroke="currentColor"
             viewBox="0 0 24 24"
@@ -131,7 +51,7 @@ export default function ChatList({
             placeholder="Will implement search soon..."
             value={searchQuery}
             onChange={(e) => setSearchQuery(e.target.value)}
-            className="w-full bg-[#392e4a] text-white text-sm rounded-full py-2.5 pl-10 pr-4 placeholder-[#89819e] focus:outline-none focus:ring-1 focus:ring-[#a379f8] transition-all"
+            className="w-full bg-surface-secondary text-text-primary text-sm rounded-full py-2.5 pl-10 pr-4 placeholder-text-muted border border-transparent focus:outline-none focus:ring-2 focus:ring-primary/30 focus:border-primary/40 transition-all"
           />
         </div>
       </div>
@@ -141,7 +61,7 @@ export default function ChatList({
       {/* Messages List */}
       <div className="flex-1 overflow-y-auto custom-scrollbar">
         <div className="px-5 py-2">
-          <h2 className="text-[#89819e] text-xs font-bold uppercase tracking-wider mb-2">
+          <h2 className="text-text-muted text-xs font-bold uppercase tracking-wider mb-2">
             Messages
           </h2>
         </div>
@@ -171,20 +91,25 @@ export default function ChatList({
         absolute
         bottom-6
         right-6
-        bg-purple-600
-        hover:bg-purple-500
+        bg-primary
+        hover:bg-primary-hover
         text-white
+        text-sm
+        font-medium
         rounded-full
         px-5
         py-3
-        shadow-xl
+        shadow-lg
+        shadow-primary/25
+        hover:-translate-y-0.5
         transition-all
+        duration-200
         cursor-pointer"
       >
         + New Chat
       </button>
 
-      {/* Global styles for custom scrollbar to match the sleek design */}
+      {/* Global styles for custom scrollbar to match the design */}
       <style
         dangerouslySetInnerHTML={{
           __html: `
@@ -195,11 +120,11 @@ export default function ChatList({
           background: transparent;
         }
         .custom-scrollbar::-webkit-scrollbar-thumb {
-          background: #392e4a;
+          background: #E8DDD4;
           border-radius: 4px;
         }
         .custom-scrollbar::-webkit-scrollbar-thumb:hover {
-          background: #55486d;
+          background: #D9C9B8;
         }
       `,
         }}

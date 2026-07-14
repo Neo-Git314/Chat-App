@@ -94,15 +94,15 @@ const LogoutIcon = () => (
 
 const ChatFlowLogo = () => (
   <svg viewBox="0 0 32 32" fill="none" className="w-8 h-8 shrink-0">
-    <rect width="32" height="32" rx="10" fill="#7C3AED" />
+    <rect width="32" height="32" rx="10" fill="#D97745" />
     <path
       d="M8 10C8 9.44772 8.44772 9 9 9H23C23.5523 9 24 9.44772 24 10V19C24 19.5523 23.5523 20 23 20H13L9 23.5V20H9C8.44772 20 8 19.5523 8 19V10Z"
       fill="white"
-      fillOpacity="0.9"
+      fillOpacity="0.95"
     />
-    <circle cx="12" cy="14.5" r="1.5" fill="#7C3AED" />
-    <circle cx="16" cy="14.5" r="1.5" fill="#7C3AED" />
-    <circle cx="20" cy="14.5" r="1.5" fill="#7C3AED" />
+    <circle cx="12" cy="14.5" r="1.5" fill="#D97745" />
+    <circle cx="16" cy="14.5" r="1.5" fill="#D97745" />
+    <circle cx="20" cy="14.5" r="1.5" fill="#D97745" />
   </svg>
 );
 
@@ -113,17 +113,15 @@ export default function ChatSidebar({
   currentUser,
   chatCount,
 }) {
-  // const [active, setActive] = useState("chats");
   const [collapsed, setCollapsed] = useState(false);
 
   return (
     <aside
       className={`
           relative flex flex-col h-screen
-         bg-[#130a1e] border-r border-[#2d1f4e]
+          bg-sidebar border-r border-border
           transition-all duration-300 ease-in-out
           ${collapsed ? "w-18" : "w-55"}
-          border-r border-[#2d1f4e] shadow-2xl shadow-black/40
           shrink-0
         `}
     >
@@ -132,7 +130,7 @@ export default function ChatSidebar({
         <ChatFlowLogo />
         <span
           className={`
-              text-white font-semibold text-lg tracking-tight
+              text-text-primary font-bold text-lg tracking-tight
               transition-all duration-300 overflow-hidden whitespace-nowrap
               ${collapsed ? "w-0 opacity-0" : "w-auto opacity-100"}
             `}
@@ -142,7 +140,7 @@ export default function ChatSidebar({
       </div>
 
       {/* Divider */}
-      <div className="mx-3 mb-4 border-t border-[#2d1f4e]" />
+      <div className="mx-3 mb-4 border-t border-border" />
 
       {/* Nav Items */}
       <nav className="flex flex-col gap-1 px-3 flex-1">
@@ -156,22 +154,10 @@ export default function ChatSidebar({
             <button
               key={item.id}
               onClick={() => {
-
-                if (item.id === "chats") {
-                  setView("chat");
-                }
-
-                if (item.id === "contacts") {
-                  setView("contacts");
-                }
-
-                if (item.id === "profile") {
-                  setView("profile");
-                }
-
-                if (item.id === "settings") {
-                  setView("settings");
-                }
+                if (item.id === "chats") setView("chat");
+                if (item.id === "contacts") setView("contacts");
+                if (item.id === "profile") setView("profile");
+                if (item.id === "settings") setView("settings");
               }}
               title={collapsed ? item.label : undefined}
               className={`
@@ -181,21 +167,21 @@ export default function ChatSidebar({
                   text-left relative overflow-hidden cursor-pointer
                   ${
                     isActive
-                      ? "bg-[#5b21b6] text-white shadow-lg shadow-purple-900/40"
-                      : "text-[#9d8cbf] hover:bg-[#261a40] hover:text-white"
+                      ? "bg-primary text-white shadow-md shadow-primary/30"
+                      : "text-text-secondary hover:bg-surface hover:text-text-primary"
                   }
                 `}
             >
-              {/* Active glow strip */}
+              {/* Active indicator strip */}
               {isActive && (
-                <span className="absolute left-0 top-2 bottom-2 w-1 rounded-full bg-[#a78bfa]" />
+                <span className="absolute left-0 top-2 bottom-2 w-1 rounded-full bg-white/70" />
               )}
 
               {/* Icon */}
               <span
                 className={`
                     shrink-0 transition-transform duration-200
-                    ${isActive ? "text-white" : "text-[#7c5cbf] group-hover:text-[#c4b5fd]"}
+                    ${isActive ? "text-white" : "text-primary/70 group-hover:text-primary"}
                     group-hover:scale-110
                   `}
               >
@@ -213,9 +199,13 @@ export default function ChatSidebar({
                 {item.label}
               </span>
 
-              {/* Badge example for Chats */}
+              {/* Badge for Chats */}
               {item.id === "chats" && !collapsed && (
-                <span className="ml-auto text-[10px] font-semibold bg-[#7c3aed] text-white rounded-full px-1.5 py-0.5 leading-none">
+                <span
+                  className={`ml-auto text-[10px] font-semibold rounded-full px-1.5 py-0.5 leading-none ${
+                    isActive ? "bg-white/25 text-white" : "bg-accent/30 text-primary"
+                  }`}
+                >
                   {chatCount}
                 </span>
               )}
@@ -230,7 +220,7 @@ export default function ChatSidebar({
           onClick={() => setCollapsed((c) => !c)}
           className="
               flex items-center justify-center w-full py-2 rounded-xl
-              text-[#7c5cbf] hover:text-white hover:bg-[#261a40]
+              text-text-secondary hover:text-text-primary hover:bg-surface
               transition-all duration-200 cursor-pointer
             "
           title={collapsed ? "Expand sidebar" : "Collapse sidebar"}
@@ -253,7 +243,7 @@ export default function ChatSidebar({
       </div>
 
       {/* Divider */}
-      <div className="mx-3 mb-3 border-t border-[#2d1f4e]" />
+      <div className="mx-3 mb-3 border-t border-border" />
 
       {/* User avatar + logout */}
       <div className="px-3 pb-5 flex flex-col gap-2">
@@ -265,17 +255,17 @@ export default function ChatSidebar({
             `}
         >
           <div className="relative shrink-0">
-            <div className="w-8 h-8 rounded-full bg-linear-to-br from-[#7c3aed] to-[#a78bfa] flex items-center justify-center text-white text-xs font-semibold">
+            <div className="w-8 h-8 rounded-full bg-linear-to-br from-primary to-accent flex items-center justify-center text-white text-xs font-semibold">
               {currentUser?.displayName?.slice(0, 2).toUpperCase() || "U"}
             </div>
-            <span className="absolute bottom-0 right-0 w-2 h-2 rounded-full bg-emerald-400 border border-[#1a1133]" />
+            <span className="absolute bottom-0 right-0 w-2 h-2 rounded-full bg-success border border-sidebar" />
           </div>
           {!collapsed && (
             <div className="overflow-hidden">
-              <p className="text-white text-xs font-semibold leading-tight truncate">
+              <p className="text-text-primary text-xs font-semibold leading-tight truncate">
                 {currentUser?.displayName || "User"}
               </p>
-              <p className="text-[#7c5cbf] text-[10px] leading-tight">Online</p>
+              <p className="text-text-muted text-[10px] leading-tight">Online</p>
             </div>
           )}
         </div>
@@ -286,7 +276,7 @@ export default function ChatSidebar({
           className="
               group flex items-center gap-3 w-full
               px-3 py-2.5 rounded-xl
-              text-[#9d8cbf] hover:bg-[#3b0d0d] hover:text-red-400
+              text-text-secondary hover:bg-danger-bg hover:text-danger
               transition-all duration-200
             "
           title={collapsed ? "Log out" : undefined}

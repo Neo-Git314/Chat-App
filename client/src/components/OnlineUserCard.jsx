@@ -1,15 +1,15 @@
 // OnlineUserCard.jsx — individual user item for the Online Now strip
 
-// Deterministic color per user based on initials
+// Deterministic warm color per user based on initials
 const AVATAR_COLORS = [
-  "#7c3aed", // violet
-  "#6d28d9", // purple
-  "#4f46e5", // indigo
-  "#0891b2", // cyan
-  "#059669", // emerald
-  "#d97706", // amber
-  "#dc2626", // red
-  "#db2777", // pink
+  "#D97745", // terracotta (primary)
+  "#C1584A", // clay red
+  "#D89A3D", // warm amber
+  "#A67C52", // toffee brown
+  "#8B9574", // muted sage
+  "#B5836B", // dusty rose-brown
+  "#6B8F87", // muted teal (cool accent, kept soft)
+  "#9C7A55", // warm tan
 ];
 
 function colorFromInitials(initials = "") {
@@ -33,7 +33,7 @@ export default function OnlineUserCard({ user }) {
             w-11 h-11 rounded-full overflow-hidden flex items-center justify-center
             text-white text-sm font-semibold select-none flex-shrink-0
             transition-transform duration-200 group-hover:scale-110
-            ring-2 ring-[#2d1f4e] group-hover:ring-[#5b21b6]
+            ring-2 ring-border group-hover:ring-primary/50
           "
           style={{ backgroundColor: bgColor }}
         >
@@ -53,8 +53,8 @@ export default function OnlineUserCard({ user }) {
           <span
             className="
               absolute bottom-0 right-0
-              w-2.5 h-2.5 rounded-full bg-emerald-400
-              border-2 border-[#1a1133]
+              w-2.5 h-2.5 rounded-full bg-success
+              border-2 border-surface
             "
           />
         )}
@@ -63,8 +63,8 @@ export default function OnlineUserCard({ user }) {
       {/* Name */}
       <span
         className="
-          text-[11px] font-medium text-[#9d8cbf]
-          group-hover:text-white transition-colors duration-200
+          text-[11px] font-medium text-text-secondary
+          group-hover:text-text-primary transition-colors duration-200
           max-w-[48px] text-center truncate leading-tight
         "
       >

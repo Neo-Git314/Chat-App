@@ -43,9 +43,9 @@ export default function InputMessage({
   };
 
   return (
-    <div className="w-full bg-[#120f1e] px-4 py-3 flex items-center gap-3">
+    <div className="w-full bg-surface border-t border-border px-4 py-3 flex items-center gap-3">
       {/* ── Pill input ────────────────────────────────────────────── */}
-      <div className="flex-1 flex items-center bg-[#2b1f4e] rounded-full px-4 py-2.5 shadow-inner">
+      <div className="flex-1 flex items-center bg-surface-secondary rounded-full px-4 py-2.5 border border-transparent focus-within:border-primary/40 focus-within:ring-2 focus-within:ring-primary/20 transition-all">
         <input
           type="text"
           value={value}
@@ -56,11 +56,11 @@ export default function InputMessage({
           aria-label="Message input"
           className="
             flex-1 bg-transparent
-            text-slate-200 text-sm
-            placeholder-slate-500
+            text-text-primary text-sm
+            placeholder-text-muted
             outline-none border-none
             disabled:opacity-50 disabled:cursor-not-allowed
-            caret-violet-400
+            caret-primary
           "
         />
       </div>
@@ -73,15 +73,16 @@ export default function InputMessage({
         className="
           flex-shrink-0
           w-10 h-10 rounded-full
-          bg-violet-600 hover:bg-violet-500
+          bg-primary hover:bg-primary-hover
           active:scale-95
           flex items-center justify-center
           text-white
-          shadow-lg shadow-violet-900/50
+          shadow-md shadow-primary/25
+          hover:-translate-y-0.5
           transition-all duration-150
-          disabled:opacity-40 disabled:cursor-not-allowed
-          disabled:hover:bg-violet-600
-          focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-violet-400
+          disabled:opacity-40 disabled:cursor-not-allowed disabled:hover:translate-y-0
+          disabled:hover:bg-primary
+          focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary/40
         "
       >
         <IoSend className="w-4 h-4 translate-x-px" />

@@ -1,1 +1,60 @@
+@import url('https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=Inter:wght@400;500;600&display=swap');
 @import "tailwindcss";
+
+
+@custom-variant dark (&:where(.dark, .dark *));
+
+
+@theme {
+  --color-background: #F8F5F1;
+  --color-surface: #FFFDFB;
+  --color-surface-secondary: #F3ECE5;
+  --color-sidebar: #F1E7DA;
+  --color-primary: #D97745;
+  --color-primary-hover: #C56737;
+  --color-accent: #E9B07A;
+  --color-border: #E8DDD4;
+  --color-text-primary: #2F2A26;
+  --color-text-secondary: #70675F;
+  --color-text-muted: #9D938B;
+  --color-success: #67A36B;
+  --color-warning: #D89A3D;
+  --color-danger: #C1584A;
+  --color-danger-bg: #FBEAE6;
+
+  --font-sans: "Plus Jakarta Sans", "Inter", ui-sans-serif, system-ui, sans-serif;
+}
+
+html {
+  font-family: var(--font-sans);
+}
+
+body {
+  background-color: var(--color-background);
+  color: var(--color-text-primary);
+}
+
+* {
+  scrollbar-width: thin;
+  scrollbar-color: var(--color-border) transparent;
+}
+
+:focus-visible {
+  outline: 2px solid var(--color-primary);
+  outline-offset: 2px;
+}
+/* Dark Mode Overrides for Custom Variables */
+.dark {
+  --color-background: #0B1120;
+  --color-surface: #111827;
+  --color-surface-secondary: #1F2937;
+  --color-sidebar: #0F172A;
+  --color-border: #374151;
+  --color-text-primary: #F9FAFB;
+  --color-text-secondary: #D1D5DB;
+  --color-text-muted: #9CA3AF;
+  
+  /* You can optionally tweak primary/accent colors for dark mode here, 
+     or leave them out to keep the orange branding consistent */
+  --color-danger-bg: #7F1D1D;
+}
