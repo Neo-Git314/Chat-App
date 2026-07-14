@@ -17,11 +17,12 @@ const isUrl = (str) =>
   typeof str === "string" && (str.startsWith("http") || str.startsWith("/"));
 
 export default function ChatHeader({
-  userName = "Sara Chen",   
+  userName = "Sara Chen",
   userAvatar = "SC",
   isOnline = true,
   lastSeen = "Offline",
   avatarColor = "bg-purple-500",
+  onViewProfile,
 }) {
   return (
     <header
@@ -35,41 +36,47 @@ export default function ChatHeader({
       "
     >
       {/* ── Avatar ──────────────────────────────────────────────── */}
-      <div className="flex-shrink-0">
-        {isUrl(userAvatar) ? (
-          <img
-            src={userAvatar}
-            alt={userName}
-            className="w-9 h-9 rounded-full object-cover"
-          />
-        ) : (
-          <div
-            className={`
-              w-9 h-9 rounded-full
-              flex items-center justify-center
-              text-white text-xs font-bold select-none
-              ${avatarColor}
-            `}
-            aria-label={`Avatar for ${userName}`}
-          >
-            {userAvatar}
-          </div>
-        )}
-      </div>
+      <button
+        onClick={onViewProfile}
+        className="flex items-center gap-3 cursor-pointer rounded-lg px-2 py-1 hover:bg-[#2a2352] transition-colors"
+      >
+        {/* Avatar */}
+        <div className="flex-shrink-0">
+          {isUrl(userAvatar) ? (
+            <img
+              src={userAvatar}
+              alt={userName}
+              className="w-9 h-9 rounded-full object-cover"
+            />
+          ) : (
+            <div
+              className={`
+          w-9 h-9 rounded-full
+          flex items-center justify-center
+          text-white text-xs font-bold select-none
+          ${avatarColor}
+        `}
+            >
+              {userAvatar}
+            </div>
+          )}
+        </div>
 
-      {/* ── Name + Status ────────────────────────────────────────── */}
-      <div className="flex flex-col justify-center min-w-0">
-        <span className="text-white text-sm font-semibold leading-tight truncate">
-          {userName}
-        </span>
-        <span
-          className={`text-xs leading-tight mt-0.5 truncate ${
-            isOnline ? "text-purple-300/70" : "text-slate-500"
-          }`}
-        >
-          {isOnline ? "Active now" : lastSeen}
-        </span>
-      </div>
+        {/* Name + Status */}
+        <div className="flex flex-col justify-center min-w-0 text-left">
+          <span className="text-white text-sm font-semibold truncate">
+            {userName}
+          </span>
+
+          <span
+            className={`text-xs mt-0.5 ${
+              isOnline ? "text-purple-300/70" : "text-slate-500"
+            }`}
+          >
+            {isOnline ? "Active now" : lastSeen}
+          </span>
+        </div>
+      </button>
     </header>
   );
 }

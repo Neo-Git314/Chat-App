@@ -93,6 +93,15 @@ export default function ChatList({
   const [selectedId, setSelectedId] = useState(1);
   const [searchQuery, setSearchQuery] = useState("");
 
+  const filteredUsers = users.filter((user) => {
+    const query = searchQuery.toLowerCase();
+  
+    return (
+      (user.name || "").toLowerCase().includes(query) ||
+      (user.message || "").toLowerCase().includes(query)
+    );
+  });
+
   return (
     <div className="relative w-[340px] h-screen bg-[#130a1e] flex flex-col font-sans -ml-2 z-10">
       {/* Header */}
@@ -128,7 +137,7 @@ export default function ChatList({
           </svg>
           <input
             type="text"
-            placeholder="Will implement search soon..."
+            placeholder="Search Users..."
             value={searchQuery}
             onChange={(e) => setSearchQuery(e.target.value)}
             className="w-full bg-[#392e4a] text-white text-sm rounded-full py-2.5 pl-10 pr-4 placeholder-[#89819e] focus:outline-none focus:ring-1 focus:ring-[#a379f8] transition-all"
@@ -147,7 +156,7 @@ export default function ChatList({
         </div>
 
         <div className="flex flex-col px-2 gap-1 pb-4">
-          {users.map((chat) => (
+          {filteredUsers.map((chat) => (
             <ChatItem
               key={chat.id}
               name={chat.name}
@@ -158,7 +167,8 @@ export default function ChatList({
               isOnline={chat.isOnline}
               isSelected={selectedId === chat.id}
               onClick={() => {
-                (setSelectedId(chat.id), onSelectUser(chat));
+                  setSelectedId(chat.id);
+                  onSelectUser(chat);
               }}
             />
           ))}

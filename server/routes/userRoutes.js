@@ -47,4 +47,36 @@ router.get("/", verifyToken, async (req, res) => {
         return res.status(500).json({ message: "Internal Server Error" });
     }
 });
+
+router.patch('/:uid', verifyToken, async (req, res) => {
+    try {
+        if (req.user.uid !== req.params.uid) {
+            return res.status(403).json({ message: "Unauthorized to update this user." });
+        }
+        const { displayName, bio, photoURL } = req.body;
+        const updatedUser = await User.findOneAndUpdate(
+            { uid: req.params.uid },
+            { displayName, bio, photoURL },
+            { new: true }
+        ).select("uid displayName email photoURL bio isOnline lastSeen");
+        res.status(200).json(updatedUser);
+    } catch (error) {
+        console.error("Profile update error:", error);
+        return res.status(500).json({ message: "Internal Server Error" });
+    }
+});
+
+router.get('/:uid', verifyToken, async (req, res) => {
+    try {
+        const user = await User.findOne({ uid: req.params.uid }).select("uid displayName email photoURL bio isOnline lastSeen").lean();
+        if (!user) {
+            return res.status(404).json({ message: "User not found" });
+        }
+        res.status(200).json(user);
+    } catch (error) {
+        console.error("Error fetching user:", error);
+        return res.status(500).json({ message: "Internal Server Error" });
+    }
+});
+
 module.exports = router;

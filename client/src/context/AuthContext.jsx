@@ -14,11 +14,18 @@ const AuthContext = createContext();
 
 export const AuthProvider = ({ children }) => {
   const [currentUser, setCurrentUser] = useState(null);
+  const [profile, setProfile] = useState(null);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    const unsubscribe = onAuthStateChanged(auth, (user) => {
+    const unsubscribe = onAuthStateChanged(auth, async (user) => {
       setCurrentUser(user);
+
+      if (user) {
+        await fetchUserProfile(user);
+      } else {
+        setProfile(null);
+      }
       setLoading(false);
     });
     return unsubscribe;
@@ -91,14 +98,43 @@ export const AuthProvider = ({ children }) => {
     }
   };
 
+  const refreshCurrentUser = async () => {
+    if (!auth.currentUser) return;
+    
+    await auth.currentUser.reload();
+    setCurrentUser({...auth.currentUser});
+  }
+
+  const fetchUserProfile = async (user) => {
+    if (!user) return;
+    try {
+      const token = await user.getIdToken();
+      const res = await axios.get(
+        `${import.meta.env.VITE_API_URL}/api/users/${user.uid}`,
+        {
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
+        },
+      );
+      setProfile(res.data);
+    } catch (error) {
+      console.error("Error fetching user profile:", error);
+    }
+  };
+
   return (
     <AuthContext.Provider
       value={{
         currentUser,
+        profile,
+        setProfile,
+        fetchUserProfile,
         login,
         signup,
         signInWithGoogle,
         logout,
+        refreshCurrentUser,
       }}
     >
       {!loading && children}

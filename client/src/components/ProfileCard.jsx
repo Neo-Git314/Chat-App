@@ -34,6 +34,8 @@ export default function ProfileCard({
   about    = "Available for chatting",
   avatar   = "",
   isOnline = true,
+  editable = false,
+  onEdit   = () => {},
 }) {
   const initials = name
     .split(" ")
@@ -47,7 +49,7 @@ export default function ProfileCard({
   return (
     <aside
       className="
-        w-full max-w-[230px] flex-shrink-0
+        w-full
         bg-[#1a1133] border border-[#2d1f4e] rounded-2xl
         p-5 flex flex-col gap-4
         shadow-xl shadow-black/40
@@ -103,6 +105,17 @@ export default function ProfileCard({
         <ProfileField label="About"    value={about}    />
         <ProfileField label="Email"    value={email}    />
       </div>
+      {editable && (
+      <button
+        onClick={onEdit}
+        className="
+          mt-4 w-full bg-purple-600 hover:bg-purple-500 text-white font-semibold py-2 rounded-lg
+          transition-colors duration-200
+        "
+      >
+        Edit Profile
+      </button>
+    )}
     </aside>
   );
 }

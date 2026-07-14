@@ -149,14 +149,6 @@ const Login = () => {
               />
               Google
             </button>
-            <button className="flex-1 flex items-center justify-center gap-2 border border-gray-200 rounded py-2 text-xs text-gray-600 hover:bg-gray-50">
-              <span>🍎</span>
-              Apple
-            </button>
-            <button className="flex-1 flex items-center justify-center gap-2 border border-gray-200 rounded py-2 text-xs text-gray-600 hover:bg-gray-50">
-              <span className="text-indigo-500">💬</span>
-              Discord
-            </button>
           </div>
 
           <p className="text-center text-xs text-gray-400 mt-4">

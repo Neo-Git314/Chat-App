@@ -7,6 +7,7 @@ import MessageBubble from "../components/MessageBubble";
 import InputMessage from "../components/InputMessage";
 import UserProfilePage from "../components/UserProfile";
 import Settings from "../components/Settings";
+import ProfileCard from "../components/ProfileCard";
 import { useAuth } from "../context/AuthContext";
 import { useSocket } from "../context/SocketContext";
 import TypingIndicator from "../components/TypingIndicator";
@@ -60,6 +61,7 @@ const Chat = () => {
   const [conversations, setConversations] = useState([]); // from GET /api/conversations/:uid
   const [allUsers, setAllUsers] = useState([]); // from GET /api/users — used to start NEW chats
   const [selectedUser, setSelectedUser] = useState(null);
+  const [viewedUser, setViewedUser] = useState(null); // for viewing another user's profile
   const [conversationId, setConversationId] = useState(null);
   const [messages, setMessages] = useState([]);
   const [onlineUserIds, setOnlineUserIds] = useState([]);
@@ -68,6 +70,7 @@ const Chat = () => {
   const messagesEndRef = useRef(null);
   const messagesContainerRef = useRef(null);
   const [showScrollDown, setShowScrollDown] = useState(false);
+  const [showUserProfile, setShowUserProfile] = useState(false);
 
   const authHeader = async () => {
     const token = await currentUser.getIdToken();
@@ -97,6 +100,19 @@ const Chat = () => {
       setAllUsers(res.data);
     } catch (err) {
       console.log("fetch users error:", err.message);
+    }
+  };
+
+  const fetchUserProfile = async (uid) => {
+    try {
+      const config = await authHeader();
+
+      const res = await axios.get(`${API_URL}/api/users/${uid}`, config);
+
+      setViewedUser(res.data);
+      setShowUserProfile(true);
+    } catch (err) {
+      console.log("fetch user profile error:", err.message);
     }
   };
 
@@ -371,6 +387,7 @@ const Chat = () => {
                     ?.slice(0, 2)
                     .toUpperCase()}
                   isOnline={onlineUserIds.includes(selectedUser.uid)}
+                  onViewProfile={() => fetchUserProfile(selectedUser.uid)}
                 />
                 <div
                   ref={messagesContainerRef}
@@ -495,13 +512,42 @@ const Chat = () => {
 
       {view === "profile" && (
         <div className="flex-1 overflow-y-auto">
-          <UserProfilePage currentUser={currentUser} onLogout={handleLogout} />
+          <UserProfilePage currentUser={currentUser} />
         </div>
       )}
 
       {view === "settings" && (
         <div className="flex-1 bg-[#130a1e] p-4 overflow-y-auto">
           <Settings onLogout={handleLogout} />
+        </div>
+      )}
+      {showUserProfile && viewedUser && (
+        <div className="fixed inset-0 bg-black/60 flex items-center justify-center z-50">
+          <div className="relative w-full max-w-[500px] bg-[#1a1133] rounded-2xl border border-[#2d1f4e] p-6 shadow-2xl">
+            <button
+              onClick={() => setShowUserProfile(false)}
+              className="
+          absolute -top-4 -right-4
+          w-10 h-10 rounded-full
+          bg-[#1a1133]
+          text-white
+          hover:bg-[#2d1f4e]
+          transition
+        "
+            >
+              ✕
+            </button>
+
+            <ProfileCard
+              name={viewedUser.displayName}
+              username={viewedUser.displayName.replace(/\s/g, "").toLowerCase()}
+              email={viewedUser.email}
+              about={viewedUser.bio}
+              avatar={viewedUser.photoURL}
+              isOnline={viewedUser.isOnline}
+              editable={false}
+            />
+          </div>
         </div>
       )}
     </div>
