@@ -2,6 +2,7 @@ const express = require("express");
 const router = express.Router();
 const User = require("../models/User");
 const Conversation = require("../models/Conversation");
+const Request=require("../models/Request");
 const verifyToken = require("../middleware/authMiddleware");
 router.post("/", verifyToken, async (req, res) => {
     try {
@@ -14,6 +15,18 @@ router.post("/", verifyToken, async (req, res) => {
         if (!participantExists) {
             return res.status(404).json({ message: "User not found" });
         } 
+        const areFriends = await Request.findOne({
+            $or: [
+                { senderId: currentUserId, receiverId: participantId },
+                { senderId: participantId, receiverId: currentUserId }
+            ],
+            status: "accepted"
+        });
+        if(!areFriends){
+            return res.status(403).json({
+                message:"send request first"
+            });
+        }
           const existingConversation = await Conversation.findOne({
             participants: { $all: [currentUserId, participantId] }
         });

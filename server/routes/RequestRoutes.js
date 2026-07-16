@@ -4,7 +4,7 @@ const Request = require("../models/Request");
 const Conversation = require("../models/Conversation");
 const verifyToken = require("../middleware/authMiddleware");
 router.post("/", verifyToken, async (req, res) => {
-    try 
+    try {
         const senderId = req.user.uid;
         const { receiverId } = req.body;
 
@@ -54,6 +54,7 @@ router.post("/", verifyToken, async (req, res) => {
             message: "Friend request sent successfully",
             request: newRequest
         });
+    }
 
      catch (error) {
         console.error("Error in POST /api/requests:", error);
