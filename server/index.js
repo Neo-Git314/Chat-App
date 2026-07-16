@@ -53,7 +53,11 @@ mongoose.connect(process.env.MONGO_URI)
   .then(() => console.log('MongoDB connected'))
   .catch(err => console.log('MongoDB connection error:', err));
 socketHandler(io);
-server.listen(process.env.PORT, () => {
-  console.log(`Server is running on port ${process.env.PORT}`)
- 
-})
+
+server.listen(PORT, () => {
+  setInterval(() => {
+    fetch('https://chat-app-r541.onrender.com/')
+      .then(() => console.log('Pinged self!'))
+      .catch(() => console.log('Self ping failed.'));
+  }, 1000 * 60 * 10);
+});

@@ -2,25 +2,25 @@ const Message = require('../models/Message');
 const User = require('../models/User');
 const Conversation = require('../models/Conversation');
 
-const onlineUsers = new Set();
+const onlineUsers = new Map();
 
 const socketHandler = (io) => {
-  io.on('connection', (socket) => { 
+  io.on('connection', (socket) => {
     console.log('New client connected:', socket.id);
 
     // User comes Online
-    socket.on('user:online', async (userId) => {
-      console.log('User online:', userId);
+    socket.on("user:online", (userId) => {
       socket.userId = userId;
       socket.join(userId);
-      onlineUsers.add(userId);
 
-      console.log('Current online users:', Array.from(onlineUsers));
+      if (!onlineUsers.has(userId)) {
+        onlineUsers.set(userId, new Set());
+      }
 
-      await User.findOneAndUpdate({ uid: userId }, { isOnline :true });
-      io.emit('user:online', userId);
-      socket.emit('online:list', Array.from(onlineUsers));
-    })
+      onlineUsers.get(userId).add(socket.id);
+
+      socket.emit("online:list", Array.from(onlineUsers.keys()));
+    });
 
     // Handling Message Sending
     socket.on('message:send', async (data, callback) => {
@@ -30,16 +30,16 @@ const socketHandler = (io) => {
         const message = await Message.create({ conversationId, senderId, content, type });
 
         await Conversation.findByIdAndUpdate(conversationId, {
-        lastMessage: {
-          content, 
-          senderId,
-          type,
-          timestamp: message.createdAt || new Date(),
-        },
-      });
+          lastMessage: {
+            content,
+            senderId,
+            type,
+            timestamp: message.createdAt || new Date(),
+          },
+        });
         io.to(receiverId).emit('message:receive', message);
 
-        if (callback) callback({ success: true, messageId: message._id});
+        if (callback) callback({ success: true, messageId: message._id });
       } catch (err) {
         console.log('message:send error:', err);
         if (callback) callback({ success: false, error: 'Failed to send message' });
@@ -60,7 +60,7 @@ const socketHandler = (io) => {
       const { conversationId, userId, senderId } = data;
 
       try {
-         await Message.updateMany({ conversationId, seenBy: { $ne: userId } }, { $push: { seenBy: userId } });
+        await Message.updateMany({ conversationId, seenBy: { $ne: userId } }, { $push: { seenBy: userId } });
 
         io.to(senderId).emit('message:seen', { conversationId, userId });
       } catch (err) {
@@ -69,14 +69,25 @@ const socketHandler = (io) => {
     })
 
     // User goes Offline
-    socket.on('disconnect', async (reason) => {
-      console.log('Client disconnected:', socket.id, 'Reason:', reason);
-      if (socket.userId) {
-        onlineUsers.delete(socket.userId);
-        await User.findOneAndUpdate({ uid: socket.userId }, 
-          { isOnline: false, lastSeen: Date.now() }
-        );
-        io.emit('user:offline', socket.userId);
+    socket.on("disconnect", async () => {
+      const userId = socket.userId;
+      if (!userId) return;
+
+      const sockets = onlineUsers.get(userId);
+
+      if (sockets) {
+        sockets.delete(socket.id);
+
+        if (sockets.size === 0) {
+          onlineUsers.delete(userId);
+
+          await User.findOneAndUpdate(
+            { uid: userId },
+            { isOnline: false, lastSeen: Date.now() }
+          );
+
+          io.emit("user:offline", userId);
+        }
       }
     })
   })
