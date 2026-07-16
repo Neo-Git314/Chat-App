@@ -46,6 +46,9 @@ app.use(cors({
 }));
 
 app.use(express.json());
+app.get('/', (req, res) => {
+  res.send(' server is running');
+});
 app.use('/api/users', userRoutes);
 app.use('/api/messages', messageRoutes);
 app.use('/api/conversations', conversationRoutes); 
