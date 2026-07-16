@@ -525,7 +525,9 @@ const Chat = () => {
         <div className="fixed inset-0 bg-black/60 flex items-center justify-center z-50">
           <div className="relative w-full max-w-[500px] bg-[#1a1133] rounded-2xl border border-[#2d1f4e] p-6 shadow-2xl">
             <button
-              onClick={() => setShowUserProfile(false)}
+              onClick={() => {setShowUserProfile(false);
+                setViewedUser(null);
+              }}
               className="
           absolute -top-4 -right-4
           w-10 h-10 rounded-full
@@ -539,7 +541,7 @@ const Chat = () => {
             </button>
 
             <ProfileCard
-              name={viewedUser.displayName}
+              name={onlineUsers.includes(viewedUser.uid) ? viewedUser.displayName : ""}
               username={viewedUser.displayName.replace(/\s/g, "").toLowerCase()}
               email={viewedUser.email}
               about={viewedUser.bio}

@@ -2,7 +2,7 @@ const Message = require('../models/Message');
 const User = require('../models/User');
 const Conversation = require('../models/Conversation');
 
-const onlineUsers = new Set();
+const onlineUsers = new Map();
 
 const socketHandler = (io) => {
   io.on('connection', (socket) => {
@@ -10,29 +10,52 @@ const socketHandler = (io) => {
 
     // User comes Online
     socket.on("user:online", async (userId) => {
-      console.log("================================");
-      console.log("Socket connected");
-      console.log("Socket ID:", socket.id);
-      console.log("User ID:", userId);
-
       socket.userId = userId;
       socket.join(userId);
-      onlineUsers.add(userId);
+
+      // Get socket set for this user
+      let sockets = onlineUsers.get(userId);
+
+      // Is this the user's first active connection?
+      const firstConnection = !sockets;
+
+      if (!sockets) {
+        sockets = new Set();
+        onlineUsers.set(userId, sockets);
+      }
+
+      // Add current socket
+      sockets.add(socket.id);
 
       console.log("Online users:");
-      console.log(Array.from(onlineUsers));
-
-      await User.findOneAndUpdate(
-        { uid: userId },
-        { isOnline: true }
+      console.log(
+        [...onlineUsers.entries()].map(([uid, socketSet]) => ({
+          uid,
+          sockets: [...socketSet],
+        }))
       );
 
-      io.emit("user:online", userId);
+      // Only emit online if this is the first socket
+      if (firstConnection) {
+        try {
+          await User.findOneAndUpdate(
+            { uid: userId },
+            { isOnline: true }
+          );
 
-      socket.emit("online:list", Array.from(onlineUsers));
-      socket.broadcast.emit("online:list", Array.from(onlineUsers));
+          io.emit("user:online", userId);
+        } catch (err) {
+          console.error("Error updating user status:", err);
+        }
+      }
 
-      console.log("================================");
+      // Send online list to this client
+      socket.emit(
+        "online:list",
+        [...onlineUsers.keys()]
+      );
+
+      // console.log("================================");
     });
 
     // Handling Message Sending
@@ -83,27 +106,36 @@ const socketHandler = (io) => {
 
     // User goes Offline
     socket.on('disconnect', async (reason) => {
-      console.log("================================");
-      console.log("Socket disconnected");
-      console.log("Socket ID:", socket.id);
-      console.log("User ID:", socket.userId);
-      console.log("Reason:", reason);
       if (socket.userId) {
-        console.log("Online users BEFORE delete:");
-        console.log(Array.from(onlineUsers));
+        const sockets = onlineUsers.get(socket.userId);
 
-        onlineUsers.delete(socket.userId);
+        if (sockets) {
+          // Remove only this socket
+          sockets.delete(socket.id);
 
-        console.log("Online users AFTER delete:");
-        console.log(Array.from(onlineUsers));
-        await User.findOneAndUpdate({ uid: socket.userId },
-          { isOnline: false, lastSeen: Date.now() }
-        );
+          console.log(
+            `Remaining sockets for ${socket.userId}:`,
+            [...sockets]
+          );
 
-        console.log("Emitting user:offline ->", socket.userId);
-        io.emit('user:offline', socket.userId);
+          // User still has another active socket
+          if (sockets.size > 0) {
+            return;
+          }
 
-        console.log("================================");
+          // Last socket disconnected
+          onlineUsers.delete(socket.userId);
+
+          await User.findOneAndUpdate(
+            { uid: socket.userId },
+            {
+              isOnline: false,
+              lastSeen: new Date(),
+            }
+          );
+
+          io.emit("user:offline", socket.userId);
+        }
       }
     })
   })

@@ -11,28 +11,7 @@ export const SocketProvider = ({ children }) => {
   useEffect(() => {
     if (!currentUser) return;
 
-    const newSocket = io(import.meta.env.VITE_API_URL);
-    setSocket(newSocket);
-
-    newSocket.emit("user:online", currentUser.uid);
-    newSocket.on("connect", () => {
-      console.log("Connected:", newSocket.id);
-    });
-
-    newSocket.on("disconnect", (reason) => {
-      console.log("Disconnected:", reason);
-    });
-
-    return () => {
-      newSocket.emit("user:offline", currentUser.uid);
-      newSocket.disconnect();
-    };
-  }, [currentUser]);
-
-  useEffect(() => {
-    if (!currentUser) return;
-
-    const newSocket = io("https://chat-app-r54l.onrender.com", {
+    const newSocket = io(import.meta.env.VITE_API_URL, {
       reconnection: true,
       reconnectionAttempts: 5,
       reconnectionDelay: 1000,
@@ -40,18 +19,23 @@ export const SocketProvider = ({ children }) => {
 
     setSocket(newSocket);
 
-    // emit user:online on initial connect
     newSocket.on("connect", () => {
+      console.log("Connected:", newSocket.id);
       newSocket.emit("user:online", currentUser.uid);
     });
 
-    // re-emit user:online on every reconnection too
-    newSocket.on("reconnect", () => {
-      newSocket.emit("user:online", currentUser.uid);
+    // newSocket.on("reconnect", () => {
+    //   console.log("Reconnected");
+    //   newSocket.emit("user:online", currentUser.uid);
+    // });
+
+    newSocket.on("disconnect", (reason) => {
+      console.log("Disconnected:", reason);
     });
 
     return () => {
-      newSocket.emit("user:offline", currentUser.uid);
+      newSocket.off("connect");
+      newSocket.off("disconnect");
       newSocket.disconnect();
     };
   }, [currentUser]);
