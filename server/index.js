@@ -46,9 +46,9 @@ app.use(cors({
 }));
 
 app.use(express.json());
-app.get('/', (req, res) => {
-  res.send(' server is running');
-});
+// app.get('/', (req, res) => {
+//   res.send(' server is running');
+// });
 app.use('/api/users', userRoutes);
 app.use('/api/messages', messageRoutes);
 app.use('/api/conversations', conversationRoutes); 
@@ -57,10 +57,7 @@ mongoose.connect(process.env.MONGO_URI)
   .catch(err => console.log('MongoDB connection error:', err));
 socketHandler(io);
 
-server.listen(PORT, () => {
-  setInterval(() => {
-    fetch('https://chat-app-r541.onrender.com/')
-      .then(() => console.log('Pinged self!'))
-      .catch(() => console.log('Self ping failed.'));
-  }, 1000 * 60 * 10);
-});
+server.listen(process.env.PORT, () => {
+  console.log(`Server is running on port ${process.env.PORT}`)
+ 
+})
