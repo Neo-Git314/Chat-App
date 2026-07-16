@@ -13,11 +13,17 @@ const socketHandler = (io) => {
       socket.userId = userId;
       socket.join(userId);
 
+      const isFirstConnection = !onlineUsers.has(userId);
+
       if (!onlineUsers.has(userId)) {
         onlineUsers.set(userId, new Set());
       }
 
       onlineUsers.get(userId).add(socket.id);
+
+      if (isFirstConnection) {
+        io.emit("user:online", userId);
+      }
 
       socket.emit("online:list", Array.from(onlineUsers.keys()));
     });
