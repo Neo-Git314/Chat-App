@@ -29,6 +29,33 @@ export const SocketProvider = ({ children }) => {
     };
   }, [currentUser]);
 
+  useEffect(() => {
+    if (!currentUser) return;
+
+    const newSocket = io("https://chat-app-r54l.onrender.com", {
+      reconnection: true,
+      reconnectionAttempts: 5,
+      reconnectionDelay: 1000,
+    });
+
+    setSocket(newSocket);
+
+    // emit user:online on initial connect
+    newSocket.on("connect", () => {
+      newSocket.emit("user:online", currentUser.uid);
+    });
+
+    // re-emit user:online on every reconnection too
+    newSocket.on("reconnect", () => {
+      newSocket.emit("user:online", currentUser.uid);
+    });
+
+    return () => {
+      newSocket.emit("user:offline", currentUser.uid);
+      newSocket.disconnect();
+    };
+  }, [currentUser]);
+
   return (
     <SocketContext.Provider value={{ socket }}>
       {children}
